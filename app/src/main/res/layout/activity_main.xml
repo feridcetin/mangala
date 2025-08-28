@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="#2E2E2E"
+    tools:context=".MainActivity">
+
+    <!-- Oyun Durumu -->
+    <TextView
+        android:id="@+id/textView_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sıra: Oyuncu 1"
+        android:textColor="#E0E0E0"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Oyuncu 2 Alanı -->
+    <LinearLayout
+        android:id="@+id/player2_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/player_area_background_brown">
+
+        <!-- Oyuncu 2'nin Mağazası -->
+        <TextView
+            android:id="@+id/textView_store2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#E0E0E0"
+            android:background="@drawable/store_background_player2" />
+
+        <!-- Oyuncu 2'nin Cepleri -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_pocket12"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket11"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket10"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket9"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket8"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket7"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/textView_sayi2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#FFC107"
+            android:background="@drawable/pocket_background_oval_player2" />
+    </LinearLayout>
+
+    <!-- Oyuncu 1 Alanı -->
+    <LinearLayout
+        android:id="@+id/player1_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/player_area_background_green">
+
+        <TextView
+            android:id="@+id/textView_sayi1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#FFC107"
+            android:background="@drawable/pocket_background_oval_player1" />
+        <!-- Oyuncu 1'in Cepleri -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_pocket0"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket1"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket2"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket3"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket4"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/button_pocket5"
+                style="@style/MangalaPocketButton"
+                android:text="4" />
+        </LinearLayout>
+
+        <!-- Oyuncu 1'in Mağazası -->
+        <TextView
+            android:id="@+id/textView_store1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#E0E0E0"
+            android:background="@drawable/store_background_player1" />
+    </LinearLayout>
+
+    <!-- Reset Butonu -->
+    <Button
+        android:id="@+id/button_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#FF9800"
+        android:text="Sıfırla"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>

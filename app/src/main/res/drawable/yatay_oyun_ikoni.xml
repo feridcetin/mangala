@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bu dosya, uygulamanın yatay oyun ikonunu tanımlar. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- İkonun köşelerinin yuvarlaklığını ayarlar -->
+    <corners android:radius="16dp" />
+
+    <!-- İkonun arka plan rengi için yatay bir gradyan (geçiş) oluşturur -->
+    <gradient
+        android:angle="0"
+        android:startColor="#6D4C41"
+        android:endColor="#4E342E"
+        android:type="linear" />
+
+    <!-- İkonun yatay ve dikey boyutlarını ayarlar -->
+    <size
+        android:width="120dp"
+        android:height="80dp" />
+</shape>

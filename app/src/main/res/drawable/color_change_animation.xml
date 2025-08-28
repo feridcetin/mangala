@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="#F4A37A" /> <!-- Tıklandığında renk -->
+            <size android:width="85dp" android:height="85dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#F4C7A3" /> <!-- Normal renk -->
+            <size android:width="85dp" android:height="85dp" />
+        </shape>
+    </item>
+</selector>
