@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">mangala</string>
+    <string name="app_name">Mangala</string>
+    <string name="navigation_drawer_open">Navigasyon çekmecesini aç</string>
+    <string name="navigation_drawer_close">Navigasyon çekmecesini kapat</string>
 </resources>

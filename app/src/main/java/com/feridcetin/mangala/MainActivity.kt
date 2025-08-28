@@ -11,6 +11,15 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
+import android.graphics.Color
+import androidx.core.content.ContextCompat
+import android.content.pm.ActivityInfo
+import android.view.MenuItem
+import android.widget.LinearLayout
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +31,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var resetButton: Button
     private lateinit var player1StonesCountText: TextView
     private lateinit var player2StonesCountText: TextView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navigationView: NavigationView
 
     // 0-5 Oyuncu 1 cepleri
     // 6 Oyuncu 1 haznesi
@@ -35,6 +46,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Ekranı yatay moda ayarlama
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        // Başlık çubuğunu (ActionBar) gizle
+        supportActionBar?.hide()
         setContentView(R.layout.activity_main)
 
         // UI bileşenlerini bağla
@@ -58,6 +73,21 @@ class MainActivity : AppCompatActivity() {
         resetButton = findViewById(R.id.button_reset)
         player1StonesCountText = findViewById(R.id.textView_sayi1)
         player2StonesCountText = findViewById(R.id.textView_sayi2)
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navigationView = findViewById(R.id.nav_view)
+
+
+        // Navigation View menü öğesi tıklama dinleyicisi
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_reset -> {
+                    resetGame()
+                    drawerLayout.closeDrawers() // Menüyü kapat
+                    true // Olayı işlediğini belirt
+                }
+                else -> false
+            }
+        }
 
         // Butonlara tıklama olay dinleyicisi ekle
         pockets.forEachIndexed { index, button ->
@@ -87,7 +117,18 @@ class MainActivity : AppCompatActivity() {
         // Oyunu başlat
         resetGame()
     }
-
+    /*
+    // Yan menüden bir öğe seçildiğinde çağrılan fonksiyon
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_reset -> {
+                resetGame()
+                drawerLayout.closeDrawer(GravityCompat.END)
+            }
+        }
+        return true
+    }
+*/
     // Oyunu sıfırlama fonksiyonu
     private fun resetGame() {
         board = intArrayOf(4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0)
@@ -158,10 +199,17 @@ class MainActivity : AppCompatActivity() {
                 lastIndex = currentIndex
                 remainingStones--
 
+                // Kalan taş sayısını güncelle
+                if (currentPlayer == 1) {
+                    player1StonesCountText.text = remainingStones.toString()
+                } else {
+                    player2StonesCountText.text = remainingStones.toString()
+                }
+
                 updateUI()
 
                 // Animasyon için kısa bir gecikme
-                handler.postDelayed(this, 1300)
+                handler.postDelayed(this, 1000)
             }
         }
 
@@ -179,7 +227,7 @@ class MainActivity : AppCompatActivity() {
                     (currentPlayer == 2 && lastIndex in 7..12 && board[lastIndex] == 1) -> {
                 val oppositePocketIndex = 12 - lastIndex
                 if (board[oppositePocketIndex] > 0) {
-                    val capturedStones = board[oppositePocketIndex] + board[lastIndex]
+                    val capturedStones = board[oppositePocketIndex]
                     board[oppositePocketIndex] = 0
                     board[lastIndex] = 0
                     if (currentPlayer == 1) {
@@ -245,9 +293,13 @@ class MainActivity : AppCompatActivity() {
             if ((currentPlayer == 1 && pocketIndex in 0..5) || (currentPlayer == 2 && pocketIndex in 7..12)) {
                 button.isEnabled = true
                 button.alpha = 1.0f
+                // Vurgu için metin rengini sarı yap
+                button.setTextColor(ContextCompat.getColor(this, R.color.yellow))
             } else {
                 button.isEnabled = false
                 button.alpha = 0.5f
+                // Normal durum için metin rengini beyaz yap
+                button.setTextColor(Color.WHITE)
             }
         }
         store1.text = board[6].toString()

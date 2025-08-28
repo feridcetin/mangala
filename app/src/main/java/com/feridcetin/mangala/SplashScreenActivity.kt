@@ -1,6 +1,7 @@
 package com.feridcetin.mangala
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -9,6 +10,10 @@ import android.os.Looper
 class SplashScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Ekranı yatay moda ayarlama
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        // Başlık çubuğunu (ActionBar) gizle
+        supportActionBar?.hide()
         setContentView(R.layout.activity_splash_screen)
 
         // Handler kullanarak 3 saniyelik bir gecikme oluştur
