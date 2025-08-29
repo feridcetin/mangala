@@ -20,6 +20,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import android.media.SoundPool
+import android.media.AudioAttributes
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +35,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var player2StonesCountText: TextView
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
+
+    // Ses efektleri için SoundPool
+    private lateinit var soundPool: SoundPool
+    private var stoneSoundId: Int = 0
 
     // 0-5 Oyuncu 1 cepleri
     // 6 Oyuncu 1 haznesi
@@ -51,6 +57,27 @@ class MainActivity : AppCompatActivity() {
         // Başlık çubuğunu (ActionBar) gizle
         supportActionBar?.hide()
         setContentView(R.layout.activity_main)
+
+        // Ses efektleri için SoundPool'u başlat
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(10)
+            .setAudioAttributes(audioAttributes)
+            .build()
+
+        // Ses dosyasını yükle
+        // NOT: Ses dosyasını res/raw/ klasörüne stone_sound.mp3 veya .wav olarak eklemeyi unutmayın.
+        soundPool.setOnLoadCompleteListener { soundPool, sampleId, status ->
+            if (status == 0) {
+                // Ses dosyası yüklendi, artık çalmaya hazır.
+                // İhtiyacınız olursa burada bir işlem yapabilirsiniz.
+            }
+        }
+        stoneSoundId = soundPool.load(this, R.raw.stone_sound, 1)
 
         // UI bileşenlerini bağla
         pockets = listOf(
@@ -102,10 +129,12 @@ class MainActivity : AppCompatActivity() {
                     if ((currentPlayer == 1 && pocketIndex in 0..5) || (currentPlayer == 2 && pocketIndex in 7..12)) {
                         playTurn(pocketIndex)
                     } else {
-                        Toast.makeText(this, "Yanlış cebe tıkladınız.", Toast.LENGTH_SHORT).show()
+                        // Yanlış cebe tıklandığında gösterilecek Toast mesajı
+                        // Toast.makeText(this, "Yanlış cebe tıkladınız.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(this, "Boş cepten taş alamazsınız.", Toast.LENGTH_SHORT).show()
+                    // Boş cepten taş alınmaya çalışıldığında gösterilecek Toast mesajı
+                    // Toast.makeText(this, "Boş cepten taş alamazsınız.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -117,18 +146,13 @@ class MainActivity : AppCompatActivity() {
         // Oyunu başlat
         resetGame()
     }
-    /*
-    // Yan menüden bir öğe seçildiğinde çağrılan fonksiyon
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_reset -> {
-                resetGame()
-                drawerLayout.closeDrawer(GravityCompat.END)
-            }
-        }
-        return true
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Activity yok edildiğinde SoundPool kaynaklarını serbest bırak
+        soundPool.release()
     }
-*/
+
     // Oyunu sıfırlama fonksiyonu
     private fun resetGame() {
         board = intArrayOf(4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0)
@@ -196,6 +220,9 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 board[currentIndex]++
+                // Her taş hareketinde ses efekti çal
+                soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+
                 lastIndex = currentIndex
                 remainingStones--
 
@@ -223,8 +250,8 @@ class MainActivity : AppCompatActivity() {
             (currentPlayer == 1 && lastIndex == 6) || (currentPlayer == 2 && lastIndex == 13) -> currentPlayer
 
             // Kural 2: Son taş kendi tarafındaki boş cebe gelirse, karşıdaki cepten taşları alır
-           // (currentPlayer == 1 && lastIndex in 0..5 && board[lastIndex] == 1) || (currentPlayer == 2 && lastIndex in 7..12 && board[lastIndex] == 1) -> {
-             (board[lastIndex] == 1) -> {
+            // (currentPlayer == 1 && lastIndex in 0..5 && board[lastIndex] == 1) || (currentPlayer == 2 && lastIndex in 7..12 && board[lastIndex] == 1) -> {
+            (board[lastIndex] == 1) -> {
                 val oppositePocketIndex = 12 - lastIndex
                 if (board[oppositePocketIndex] > 0) {
                     val capturedStones = board[oppositePocketIndex]
@@ -235,7 +262,8 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         board[13] += capturedStones
                     }
-                    Toast.makeText(this, "Karşı cepten taşları yakaladınız!", Toast.LENGTH_SHORT).show()
+                    // Karşı cepten taşlar yakalandığında gösterilecek Toast mesajı
+                    // Toast.makeText(this, "Karşı cepten taşları yakaladınız!", Toast.LENGTH_SHORT).show()
                 }
                 if (currentPlayer == 1) 2 else 1
             }
