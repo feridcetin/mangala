@@ -223,8 +223,8 @@ class MainActivity : AppCompatActivity() {
             (currentPlayer == 1 && lastIndex == 6) || (currentPlayer == 2 && lastIndex == 13) -> currentPlayer
 
             // Kural 2: Son taş kendi tarafındaki boş cebe gelirse, karşıdaki cepten taşları alır
-            (currentPlayer == 1 && lastIndex in 0..5 && board[lastIndex] == 1) ||
-                    (currentPlayer == 2 && lastIndex in 7..12 && board[lastIndex] == 1) -> {
+           // (currentPlayer == 1 && lastIndex in 0..5 && board[lastIndex] == 1) || (currentPlayer == 2 && lastIndex in 7..12 && board[lastIndex] == 1) -> {
+             (board[lastIndex] == 1) -> {
                 val oppositePocketIndex = 12 - lastIndex
                 if (board[oppositePocketIndex] > 0) {
                     val capturedStones = board[oppositePocketIndex]
