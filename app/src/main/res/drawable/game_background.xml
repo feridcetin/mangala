@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Oyunun ana arka planı için ahşap dokulu bir gradyan oluşturur. -->
+    <gradient
+        android:angle="270"
+        android:startColor="#8B4513"
+        android:endColor="#A0522D"
+        android:type="linear" />
+
+    <!-- Ekranın köşelerini yuvarlatır. -->
+    <corners android:radius="0dp" />
+</shape>

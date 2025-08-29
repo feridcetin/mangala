@@ -22,6 +22,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import android.media.SoundPool
 import android.media.AudioAttributes
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 class MainActivity : AppCompatActivity() {
 
@@ -55,7 +58,15 @@ class MainActivity : AppCompatActivity() {
         // Ekranı yatay moda ayarlama
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         // Başlık çubuğunu (ActionBar) gizle
-        supportActionBar?.hide()
+        //supportActionBar?.hide()
+        // Uygulamayı tam ekran yapmak için gerekli kod
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController?.let {
+            it.hide(WindowInsetsCompat.Type.systemBars())
+            it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
         setContentView(R.layout.activity_main)
 
         // Ses efektleri için SoundPool'u başlat
