@@ -29,6 +29,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:rotation="180"
             tools:text="15" />
 
         <TextView
@@ -72,31 +73,11 @@
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:background="@drawable/player_area_background_brown"
-                    android:padding="8dp">
+                    android:padding="8dp"
+                    android:rotation="180">
 
                     <Button
-                        android:id="@+id/button_pocket12"
-                        style="@style/MangalaPocketButton"
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_weight="1"
-                        tools:text="4" />
-                    <Button
-                        android:id="@+id/button_pocket11"
-                        style="@style/MangalaPocketButton"
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_weight="1"
-                        tools:text="4" />
-                    <Button
-                        android:id="@+id/button_pocket10"
-                        style="@style/MangalaPocketButton"
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_weight="1"
-                        tools:text="4" />
-                    <Button
-                        android:id="@+id/button_pocket9"
+                        android:id="@+id/button_pocket7"
                         style="@style/MangalaPocketButton"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
@@ -110,7 +91,28 @@
                         android:layout_weight="1"
                         tools:text="4" />
                     <Button
-                        android:id="@+id/button_pocket7"
+                        android:id="@+id/button_pocket9"
+                        style="@style/MangalaPocketButton"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        tools:text="4" />
+                    <Button
+                        android:id="@+id/button_pocket10"
+                        style="@style/MangalaPocketButton"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        tools:text="4" />
+                    <Button
+                        android:id="@+id/button_pocket11"
+                        style="@style/MangalaPocketButton"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        tools:text="4" />
+                    <Button
+                        android:id="@+id/button_pocket12"
                         style="@style/MangalaPocketButton"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
@@ -129,17 +131,33 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:visibility="invisible"
-                    android:layout_gravity="center_horizontal" />
+                    android:layout_gravity="center_horizontal"
+                    android:rotation="180" />
 
-                <TextView
-                    android:id="@+id/textView_status"
+                <!-- Sıra ve sıfırlama butonu için yeni yatay düzen -->
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginVertical="8dp"
-                    android:text="Sıra: Oyuncu 1"
-                    android:textColor="@android:color/black"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/textView_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="8dp"
+                        android:text="Sıra: Oyuncu 1"
+                        android:textColor="@android:color/black"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/button_reset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sıfırla"
+                        android:layout_marginStart="16dp" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/textView_sayi1"
@@ -208,19 +226,6 @@
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Bu butonu artık gizlemedik, çünkü artık menüde yer alacak. Koddan kaldırılabilir veya visibility gone olarak kalabilir. -->
-        <Button
-            android:id="@+id/button_reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sıfırla"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:visibility="gone" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Navigation View -->
@@ -229,6 +234,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:visibility="gone"
         app:menu="@menu/main_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

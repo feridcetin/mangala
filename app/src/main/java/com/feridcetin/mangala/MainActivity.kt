@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.button_pocket8),
             findViewById(R.id.button_pocket9),
             findViewById(R.id.button_pocket10),
-            findViewById(R.id.button_pocket11),
+            R.id.button_pocket11.let { findViewById(it) },
             findViewById(R.id.button_pocket12)
         )
         store1 = findViewById(R.id.textView_store1)
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             button.setOnClickListener {
                 if (isMoving) return@setOnClickListener
 
-                // UI'daki buton indeksi ile board dizisi indeksi arasındaki eşleşme
+                // UI'daki buton indeksi ile board dizisi arasındaki eşleşme
                 val pocketIndex = if (index < 6) index else index + 1
 
                 // Hamle geçerliliğini kontrol et
@@ -172,7 +172,6 @@ class MainActivity : AppCompatActivity() {
         player1StonesCountText.visibility = View.INVISIBLE
         player2StonesCountText.visibility = View.INVISIBLE
         updateUI()
-        statusText.text = "Sıra: Oyuncu 1"
     }
 
     // Oyuncunun hamlesini başlatan fonksiyon
@@ -344,8 +343,16 @@ class MainActivity : AppCompatActivity() {
         store1.text = board[6].toString()
         store2.text = board[13].toString()
 
+        // Sıra metnini güncelle
         if (!isMoving) {
             statusText.text = "Sıra: Oyuncu $currentPlayer"
+        }
+
+        // `statusText`'in rotasyonunu oyuncuya göre ayarla
+        if (currentPlayer == 1) {
+            statusText.rotation = 0f
+        } else {
+            statusText.rotation = 180f
         }
     }
 }

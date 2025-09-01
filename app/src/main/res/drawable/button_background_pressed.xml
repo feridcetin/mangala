@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Düğmeye basıldığında gösterilecek koyu gri renk -->
+    <solid android:color="#5D7087" />
+
+    <!-- Düğme kenarlarının yumuşatılması için radius değeri -->
+    <corners android:radius="24dp" />
+
+    <!-- İsteğe bağlı olarak eklenebilecek bir kenarlık -->
+    <stroke android:color="#B0C1D0" android:width="1dp" />
+
+</shape>
