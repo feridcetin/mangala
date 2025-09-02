@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    tools:openDrawer="start">
+    tools:context=".MainActivity">
 
-    <!-- Ana içerik görünümü -->
+    <!-- Ana Oyun Alanı -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#A67B5B">
 
+        <!-- Oyuncu 2 Haznesi -->
         <TextView
             android:id="@+id/textView_store2"
             android:layout_width="80dp"
@@ -32,6 +31,7 @@
             android:rotation="180"
             tools:text="15" />
 
+        <!-- Oyuncu 1 Haznesi -->
         <TextView
             android:id="@+id/textView_store1"
             android:layout_width="80dp"
@@ -48,12 +48,13 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="15" />
 
+        <!-- Cep ve Durum Alanı -->
         <LinearLayout
             android:id="@+id/main_layout"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:orientation="horizontal"
             android:gravity="center"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/textView_store1"
             app:layout_constraintStart_toEndOf="@+id/textView_store2"
@@ -65,14 +66,14 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <!-- Oyuncu 2 Cep Sırası -->
+                <!-- Oyuncu 2'nin Cepleri -->
                 <LinearLayout
                     android:id="@+id/player2_area"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
+                    android:background="@drawable/player_area_background_brown"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:background="@drawable/player_area_background_brown"
                     android:padding="8dp"
                     android:rotation="180">
 
@@ -83,6 +84,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket8"
                         style="@style/MangalaPocketButton"
@@ -90,6 +92,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket9"
                         style="@style/MangalaPocketButton"
@@ -97,6 +100,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket10"
                         style="@style/MangalaPocketButton"
@@ -104,6 +108,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket11"
                         style="@style/MangalaPocketButton"
@@ -111,6 +116,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket12"
                         style="@style/MangalaPocketButton"
@@ -120,26 +126,26 @@
                         tools:text="4" />
                 </LinearLayout>
 
-                <!-- Animasyon için taş sayısı göstergeleri -->
+                <!-- Animasyon için taş sayıları -->
                 <TextView
                     android:id="@+id/textView_sayi2"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
+                    android:layout_gravity="center_horizontal"
                     android:background="@drawable/pocket_background_oval_player2"
                     android:gravity="center"
+                    android:rotation="180"
                     android:textColor="@android:color/white"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:visibility="invisible"
-                    android:layout_gravity="center_horizontal"
-                    android:rotation="180" />
+                    android:visibility="invisible" />
 
-                <!-- Sıra ve sıfırlama butonu için yeni yatay düzen -->
+                <!-- Durum ve Butonlar -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/textView_status"
@@ -152,33 +158,43 @@
                         android:textStyle="bold" />
 
                     <Button
+                        android:id="@+id/button_open_menu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/purple_500"
+                        android:paddingHorizontal="20dp"
+                        android:text="Menü"
+                        android:textColor="@color/white"
+                        android:textStyle="bold" />
+
+                    <Button
                         android:id="@+id/button_reset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sıfırla"
-                        android:layout_marginStart="16dp" />
+                        android:layout_marginStart="16dp"
+                        android:text="Sıfırla" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/textView_sayi1"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
+                    android:layout_gravity="center_horizontal"
                     android:background="@drawable/pocket_background_oval_player1"
                     android:gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:visibility="invisible"
-                    android:layout_gravity="center_horizontal" />
+                    android:visibility="invisible" />
 
-                <!-- Oyuncu 1 Cep Sırası -->
+                <!-- Oyuncu 1'in Cepleri -->
                 <LinearLayout
                     android:id="@+id/player1_area"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
+                    android:background="@drawable/player_area_background_green"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:background="@drawable/player_area_background_green"
                     android:padding="8dp">
 
                     <Button
@@ -188,6 +204,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket1"
                         style="@style/MangalaPocketButton"
@@ -195,6 +212,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket2"
                         style="@style/MangalaPocketButton"
@@ -202,6 +220,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket3"
                         style="@style/MangalaPocketButton"
@@ -209,6 +228,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket4"
                         style="@style/MangalaPocketButton"
@@ -216,6 +236,7 @@
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
+
                     <Button
                         android:id="@+id/button_pocket5"
                         style="@style/MangalaPocketButton"
@@ -228,13 +249,14 @@
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Navigation View -->
+    <!-- Navigasyon Menüsü -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:visibility="gone"
-        app:menu="@menu/main_menu" />
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/drawer_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

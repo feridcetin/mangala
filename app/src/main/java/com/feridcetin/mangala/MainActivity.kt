@@ -3,6 +3,7 @@ package com.feridcetin.mangala
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,6 +21,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
+import android.view.Gravity
 import android.media.SoundPool
 import android.media.AudioAttributes
 import androidx.core.view.WindowCompat
@@ -34,6 +36,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var store2: TextView
     private lateinit var statusText: TextView
     private lateinit var resetButton: Button
+
+    private lateinit var menuButton: Button // Yeni menü butonu
     private lateinit var player1StonesCountText: TextView
     private lateinit var player2StonesCountText: TextView
     private lateinit var drawerLayout: DrawerLayout
@@ -53,6 +57,7 @@ class MainActivity : AppCompatActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
 
+    @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Ekranı yatay moda ayarlama
@@ -109,11 +114,17 @@ class MainActivity : AppCompatActivity() {
         store2 = findViewById(R.id.textView_store2)
         statusText = findViewById(R.id.textView_status)
         resetButton = findViewById(R.id.button_reset)
+
+        menuButton = findViewById(R.id.button_open_menu) // Yeni buton
         player1StonesCountText = findViewById(R.id.textView_sayi1)
         player2StonesCountText = findViewById(R.id.textView_sayi2)
         drawerLayout = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.nav_view)
 
+        // Yeni eklenen kod: Menü butonuna tıklama dinleyicisi
+        menuButton.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
 
         // Navigation View menü öğesi tıklama dinleyicisi
         navigationView.setNavigationItemSelectedListener { menuItem ->
@@ -122,6 +133,16 @@ class MainActivity : AppCompatActivity() {
                     resetGame()
                     drawerLayout.closeDrawers() // Menüyü kapat
                     true // Olayı işlediğini belirt
+                }
+                R.id.nav_single_player -> {
+                    Toast.makeText(this, "Tekli oyna seçildi ...", Toast.LENGTH_SHORT).show()
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                R.id.nav_multi_player -> {
+                    Toast.makeText(this, "İkili oyun  menüsü açılacak...", Toast.LENGTH_SHORT).show()
+                    drawerLayout.closeDrawers()
+                    true
                 }
                 else -> false
             }
