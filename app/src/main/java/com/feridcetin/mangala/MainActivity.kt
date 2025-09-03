@@ -28,6 +28,9 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import kotlin.random.Random
+import android.app.AlertDialog
+import android.widget.EditText
+import android.text.InputType
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,6 +51,10 @@ class MainActivity : AppCompatActivity() {
     private var player1SetsWon = 0
     private var player2SetsWon = 0
     private var currentSet = 1
+
+    // Oyuncu isimleri için yeni değişkenler
+    private var player1Name = "Oyuncu 1"
+    private var player2Name = "Oyuncu 2"
 
     // Ses efektleri için SoundPool
     private lateinit var soundPool: SoundPool
@@ -133,6 +140,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_single_player -> {
                     resetGame()
                     isSinglePlayer = true
+                    player2Name = "Bilgisayar" // Tek oyunculu modda 2. oyuncu ismini ayarla
                     Toast.makeText(this, "Tekli oyun modu başlatıldı.", Toast.LENGTH_SHORT).show()
                     drawerLayout.closeDrawers()
                     updateUI()
@@ -141,9 +149,15 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_multi_player -> {
                     resetGame()
                     isSinglePlayer = false
+                    player2Name = "Oyuncu 2" // Çok oyunculu modda 2. oyuncu ismini sıfırla
                     Toast.makeText(this, "İkili oyun modu başlatıldı.", Toast.LENGTH_SHORT).show()
                     drawerLayout.closeDrawers()
                     updateUI()
+                    true
+                }
+                R.id.nav_change_names -> {
+                    showNameChangeDialog()
+                    drawerLayout.closeDrawers()
                     true
                 }
                 else -> false
@@ -174,6 +188,44 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         soundPool.release()
+    }
+
+    // Oyuncu isimlerini değiştirmek için diyalog penceresi gösterir
+    private fun showNameChangeDialog() {
+        val dialogView = LinearLayout(this)
+        dialogView.orientation = LinearLayout.VERTICAL
+        dialogView.setPadding(50, 50, 50, 50)
+
+        val player1Input = EditText(this)
+        player1Input.hint = "Oyuncu 1 Adı"
+        player1Input.inputType = InputType.TYPE_CLASS_TEXT
+        player1Input.setText(player1Name)
+        dialogView.addView(player1Input)
+
+        val player2Input = EditText(this)
+        player2Input.hint = "Oyuncu 2 Adı"
+        player2Input.inputType = InputType.TYPE_CLASS_TEXT
+        player2Input.setText(player2Name)
+        dialogView.addView(player2Input)
+
+        AlertDialog.Builder(this)
+            .setTitle("Oyuncu İsimlerini Değiştir")
+            .setView(dialogView)
+            .setPositiveButton("Tamam") { dialog, which ->
+                val newPlayer1Name = player1Input.text.toString().trim()
+                val newPlayer2Name = player2Input.text.toString().trim()
+
+                if (newPlayer1Name.isNotEmpty()) {
+                    player1Name = newPlayer1Name
+                }
+                if (newPlayer2Name.isNotEmpty()) {
+                    player2Name = newPlayer2Name
+                }
+                Toast.makeText(this, "İsimler güncellendi!", Toast.LENGTH_SHORT).show()
+                updateUI()
+            }
+            .setNegativeButton("İptal", null)
+            .show()
     }
 
     // Oyunu sıfırlama fonksiyonu (Toplam maçı sıfırlar)
@@ -438,11 +490,11 @@ class MainActivity : AppCompatActivity() {
             val setWinnerMessage = when {
                 board[6] > board[13] -> {
                     player1SetsWon++
-                    "Set Bitti! Oyuncu 1 Kazandı!"
+                    "Set Bitti! $player1Name Kazandı!"
                 }
                 board[13] > board[6] -> {
                     player2SetsWon++
-                    "Set Bitti! Oyuncu 2 Kazandı!"
+                    "Set Bitti! $player2Name Kazandı!"
                 }
                 else -> "Set Berabere Bitti!"
             }
@@ -457,8 +509,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 // Oyunun genel kazananını belirle
                 val finalWinnerMessage = when {
-                    player1SetsWon > player2SetsWon -> "Maç Bitti! Oyuncu 1 ${player1SetsWon}-${player2SetsWon} ile Kazandı!"
-                    player2SetsWon > player1SetsWon -> "Maç Bitti! Oyuncu 2 ${player2SetsWon}-${player1SetsWon} ile Kazandı!"
+                    player1SetsWon > player2SetsWon -> "Maç Bitti! $player1Name ${player1SetsWon}-${player2SetsWon} ile Kazandı!"
+                    player2SetsWon > player1SetsWon -> "Maç Bitti! $player2Name ${player2SetsWon}-${player1SetsWon} ile Kazandı!"
                     else -> "Maç Berabere Bitti!"
                 }
                 statusText.text = finalWinnerMessage
@@ -491,10 +543,10 @@ class MainActivity : AppCompatActivity() {
         // Sıra metnini güncelle
         if (!isMoving) {
             if (currentPlayer == 1) {
-                statusText.text = "Sıra: Oyuncu 1"
+                statusText.text = "Sıra: $player1Name"
                 statusText.rotation = 0f
             } else {
-                statusText.text = if (isSinglePlayer) "Sıra: Bilgisayar" else "Sıra: Oyuncu 2"
+                statusText.text = "Sıra: $player2Name"
                 statusText.rotation = 180f
             }
         }
