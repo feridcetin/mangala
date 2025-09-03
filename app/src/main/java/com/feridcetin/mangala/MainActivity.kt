@@ -27,6 +27,7 @@ import android.media.AudioAttributes
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var resetButton: Button
 
-    private lateinit var menuButton: Button // Yeni menü butonu
+    private lateinit var menuButton: Button
     private lateinit var player1StonesCountText: TextView
     private lateinit var player2StonesCountText: TextView
     private lateinit var drawerLayout: DrawerLayout
@@ -54,6 +55,7 @@ class MainActivity : AppCompatActivity() {
     private var board = IntArray(14)
     private var currentPlayer = 1
     private var isMoving = false
+    private var isSinglePlayer = false
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -62,8 +64,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // Ekranı yatay moda ayarlama
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        // Başlık çubuğunu (ActionBar) gizle
-        //supportActionBar?.hide()
         // Uygulamayı tam ekran yapmak için gerekli kod
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -84,15 +84,6 @@ class MainActivity : AppCompatActivity() {
             .setMaxStreams(10)
             .setAudioAttributes(audioAttributes)
             .build()
-
-        // Ses dosyasını yükle
-        // NOT: Ses dosyasını res/raw/ klasörüne stone_sound.mp3 veya .wav olarak eklemeyi unutmayın.
-        soundPool.setOnLoadCompleteListener { soundPool, sampleId, status ->
-            if (status == 0) {
-                // Ses dosyası yüklendi, artık çalmaya hazır.
-                // İhtiyacınız olursa burada bir işlem yapabilirsiniz.
-            }
-        }
         stoneSoundId = soundPool.load(this, R.raw.stone_sound, 1)
 
         // UI bileşenlerini bağla
@@ -114,14 +105,13 @@ class MainActivity : AppCompatActivity() {
         store2 = findViewById(R.id.textView_store2)
         statusText = findViewById(R.id.textView_status)
         resetButton = findViewById(R.id.button_reset)
-
-        menuButton = findViewById(R.id.button_open_menu) // Yeni buton
+        menuButton = findViewById(R.id.button_open_menu)
         player1StonesCountText = findViewById(R.id.textView_sayi1)
         player2StonesCountText = findViewById(R.id.textView_sayi2)
         drawerLayout = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.nav_view)
 
-        // Yeni eklenen kod: Menü butonuna tıklama dinleyicisi
+        // Menü butonu tıklama dinleyicisi
         menuButton.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
@@ -131,17 +121,23 @@ class MainActivity : AppCompatActivity() {
             when (menuItem.itemId) {
                 R.id.nav_reset -> {
                     resetGame()
-                    drawerLayout.closeDrawers() // Menüyü kapat
-                    true // Olayı işlediğini belirt
-                }
-                R.id.nav_single_player -> {
-                    Toast.makeText(this, "Tekli oyna seçildi ...", Toast.LENGTH_SHORT).show()
                     drawerLayout.closeDrawers()
                     true
                 }
-                R.id.nav_multi_player -> {
-                    Toast.makeText(this, "İkili oyun  menüsü açılacak...", Toast.LENGTH_SHORT).show()
+                R.id.nav_single_player -> {
+                    resetGame()
+                    isSinglePlayer = true
+                    Toast.makeText(this, "Tekli oyun modu başlatıldı.", Toast.LENGTH_SHORT).show()
                     drawerLayout.closeDrawers()
+                    updateUI()
+                    true
+                }
+                R.id.nav_multi_player -> {
+                    resetGame()
+                    isSinglePlayer = false
+                    Toast.makeText(this, "İkili oyun modu başlatıldı.", Toast.LENGTH_SHORT).show()
+                    drawerLayout.closeDrawers()
+                    updateUI()
                     true
                 }
                 else -> false
@@ -152,21 +148,11 @@ class MainActivity : AppCompatActivity() {
         pockets.forEachIndexed { index, button ->
             button.setOnClickListener {
                 if (isMoving) return@setOnClickListener
-
-                // UI'daki buton indeksi ile board dizisi arasındaki eşleşme
                 val pocketIndex = if (index < 6) index else index + 1
-
-                // Hamle geçerliliğini kontrol et
                 if (board[pocketIndex] > 0) {
                     if ((currentPlayer == 1 && pocketIndex in 0..5) || (currentPlayer == 2 && pocketIndex in 7..12)) {
                         playTurn(pocketIndex)
-                    } else {
-                        // Yanlış cebe tıklandığında gösterilecek Toast mesajı
-                        // Toast.makeText(this, "Yanlış cebe tıkladınız.", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    // Boş cepten taş alınmaya çalışıldığında gösterilecek Toast mesajı
-                    // Toast.makeText(this, "Boş cepten taş alamazsınız.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -181,7 +167,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Activity yok edildiğinde SoundPool kaynaklarını serbest bırak
         soundPool.release()
     }
 
@@ -190,6 +175,7 @@ class MainActivity : AppCompatActivity() {
         board = intArrayOf(4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0)
         currentPlayer = 1
         isMoving = false
+        isSinglePlayer = false
         player1StonesCountText.visibility = View.INVISIBLE
         player2StonesCountText.visibility = View.INVISIBLE
         updateUI()
@@ -200,34 +186,58 @@ class MainActivity : AppCompatActivity() {
         if (isMoving) return
         isMoving = true
 
-        val stonesToDistribute = board[startIndex]
-        board[startIndex] = 0
+        val stonesInPocket = board[startIndex]
 
-        // Seçilen cepten alınan taş sayısını ekranda göster
-        if (currentPlayer == 1) {
-            player1StonesCountText.text = stonesToDistribute.toString()
-            player1StonesCountText.visibility = View.VISIBLE
-            player2StonesCountText.visibility = View.INVISIBLE
-        } else {
-            player2StonesCountText.text = stonesToDistribute.toString()
-            player2StonesCountText.visibility = View.VISIBLE
-            player1StonesCountText.visibility = View.INVISIBLE
+        // KURAL: Cebe tek taş varsa, sadece o taşı alıp bir sonraki cebe at.
+        if (stonesInPocket == 1) {
+            board[startIndex] = 0 // Başlangıç cebini boşalt
+
+            var nextIndex = (startIndex + 1) % board.size
+
+            // Rakibin haznesini atla
+            if (currentPlayer == 1 && nextIndex == 13) {
+                nextIndex = (nextIndex + 1) % board.size
+            } else if (currentPlayer == 2 && nextIndex == 6) {
+                nextIndex = (nextIndex + 1) % board.size
+            }
+
+            board[nextIndex]++ // Bir sonraki cebe taşı koy
+            soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+
+            isMoving = false
+            applyGameRules(nextIndex) // Kuralları uygula
         }
+        // Standart kural: 1'den fazla taş varsa, bir tane bırakıp diğerlerini dağıt.
+        else {
+            board[startIndex] = 1
+            val remainingStones = stonesInPocket - 1
 
-        updateUI()
+            // Taş sayısını ekranda göster
+            if (currentPlayer == 1) {
+                player1StonesCountText.text = remainingStones.toString()
+                player1StonesCountText.visibility = View.VISIBLE
+                player2StonesCountText.visibility = View.INVISIBLE
+            } else {
+                player2StonesCountText.text = remainingStones.toString()
+                player2StonesCountText.visibility = View.VISIBLE
+                player1StonesCountText.visibility = View.INVISIBLE
+            }
 
-        distributeSeedsAnimated(startIndex, stonesToDistribute)
+            updateUI()
+
+            distributeSeedsAnimated(startIndex, remainingStones)
+        }
     }
 
     // Taşları animasyonlu bir şekilde dağıtma
-    private fun distributeSeedsAnimated(startIndex: Int, stonesToDistribute: Int) {
+    private fun distributeSeedsAnimated(startIndex: Int, remainingStones: Int) {
         var currentIndex = startIndex
-        var remainingStones = stonesToDistribute
-        var lastIndex = startIndex
+        var stonesLeft = remainingStones
+        var lastIndex = -1
 
         val runnable = object : Runnable {
             override fun run() {
-                if (remainingStones == 0) {
+                if (stonesLeft == 0) {
                     isMoving = false
                     player1StonesCountText.visibility = View.INVISIBLE
                     player2StonesCountText.visibility = View.INVISIBLE
@@ -244,75 +254,152 @@ class MainActivity : AppCompatActivity() {
                     currentIndex = (currentIndex + 1) % board.size
                 }
 
-                // Kuralı ekle: Oyuncu kendi haznesine ekleme yapamaz
-                if ((currentPlayer == 1 && currentIndex == 6) || (currentPlayer == 2 && currentIndex == 13)) {
-                    // Oyuncunun kendi haznesi atlanır
-                    currentIndex = (currentIndex + 1) % board.size
-                }
-
                 board[currentIndex]++
-                // Her taş hareketinde ses efekti çal
                 soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
 
                 lastIndex = currentIndex
-                remainingStones--
+                stonesLeft--
 
                 // Kalan taş sayısını güncelle
                 if (currentPlayer == 1) {
-                    player1StonesCountText.text = remainingStones.toString()
+                    player1StonesCountText.text = stonesLeft.toString()
                 } else {
-                    player2StonesCountText.text = remainingStones.toString()
+                    player2StonesCountText.text = stonesLeft.toString()
                 }
 
                 updateUI()
-
-                // Animasyon için kısa bir gecikme
-                handler.postDelayed(this, 1000)
+                handler.postDelayed(this, 300)
             }
         }
-
         handler.post(runnable)
     }
 
     // Oyun kurallarını uygulayan fonksiyon
     private fun applyGameRules(lastIndex: Int) {
-        val nextPlayer = when {
-            // Kural 1: Son taş kendi haznesine gelirse bir tur daha oynar
-            (currentPlayer == 1 && lastIndex == 6) || (currentPlayer == 2 && lastIndex == 13) -> currentPlayer
+        var nextPlayer = if (currentPlayer == 1) 2 else 1
 
-            // Kural 2: Son taş kendi tarafındaki boş cebe gelirse, karşıdaki cepten taşları alır
-            // (currentPlayer == 1 && lastIndex in 0..5 && board[lastIndex] == 1) || (currentPlayer == 2 && lastIndex in 7..12 && board[lastIndex] == 1) -> {
-            (board[lastIndex] == 1) -> {
-                val oppositePocketIndex = 12 - lastIndex
-                if (board[oppositePocketIndex] > 0) {
-                    val capturedStones = board[oppositePocketIndex]
-                    board[oppositePocketIndex] = 0
-                    board[lastIndex] = 0
-                    if (currentPlayer == 1) {
-                        board[6] += capturedStones
-                    } else {
-                        board[13] += capturedStones
-                    }
-                    // Karşı cepten taşlar yakalandığında gösterilecek Toast mesajı
-                    // Toast.makeText(this, "Karşı cepten taşları yakaladınız!", Toast.LENGTH_SHORT).show()
-                }
-                if (currentPlayer == 1) 2 else 1
+        when {
+            // KURAL 1: Son taş kendi hazinesine gelirse bir tur daha oynar.
+            (currentPlayer == 1 && lastIndex == 6) || (currentPlayer == 2 && lastIndex == 13) -> {
+                nextPlayer = currentPlayer
             }
 
-            // Kural 3: Son taş dolu bir cebe gelirse, o cepten oynamaya devam eder (animasyonsuz)
-            else -> {
-                if (board[lastIndex] > 1) {
-                    playTurn(lastIndex)
-                    return
+            // KURAL 2: Son taş rakibin bölgesinde çift sayıda taş olan bir kuyuya düşerse, tüm taşları alır.
+            (currentPlayer == 1 && lastIndex in 7..12 && board[lastIndex] % 2 == 0) -> {
+                board[6] += board[lastIndex]
+                board[lastIndex] = 0
+                nextPlayer = 2
+            }
+            (currentPlayer == 2 && lastIndex in 0..5 && board[lastIndex] % 2 == 0) -> {
+                board[13] += board[lastIndex]
+                board[lastIndex] = 0
+                nextPlayer = 1
+            }
+
+            // KURAL 3: Son taş kendi bölgesindeki boş kuyuya denk gelirse ve karşısında taş varsa, hem o taşı hem de karşıdaki taşları alır.
+            (currentPlayer == 1 && lastIndex in 0..5 && board[lastIndex] == 1) -> {
+                val oppositePocketIndex = 12 - lastIndex
+                if (board[oppositePocketIndex] > 0) {
+                    board[6] += board[oppositePocketIndex] + 1
+                    board[oppositePocketIndex] = 0
+                    board[lastIndex] = 0
                 }
-                // Kural 4: Diğer tüm durumlarda sıra diğer oyuncuya geçer
-                if (currentPlayer == 1) 2 else 1
+                nextPlayer = 2
+            }
+            (currentPlayer == 2 && lastIndex in 7..12 && board[lastIndex] == 1) -> {
+                val oppositePocketIndex = 12 - lastIndex
+                if (board[oppositePocketIndex] > 0) {
+                    board[13] += board[oppositePocketIndex] + 1
+                    board[oppositePocketIndex] = 0
+                    board[lastIndex] = 0
+                }
+                nextPlayer = 1
             }
         }
 
         currentPlayer = nextPlayer
         checkGameOver()
         updateUI()
+
+        // Tekli oyun modu aktifse, sıra bilgisayardaysa hamle yapar
+        if (isSinglePlayer && currentPlayer == 2 && !isMoving) {
+            handler.postDelayed({
+                playComputerTurn()
+            }, 1500)
+        }
+    }
+
+    // Basit Yapay Zeka (Bilgisayar) Hamlesi
+    private fun playComputerTurn() {
+        var bestMoveIndex = -1
+
+        // Kural 1: Kendi haznesine son taşı getiren hamleyi ara
+        for (i in 7..12) {
+            if (board[i] > 0) {
+                // Son taşın düşeceği kuyunun indeksi
+                val finalPocketIndex = (i + board[i] - 1) % board.size
+                if (finalPocketIndex == 13) {
+                    bestMoveIndex = i
+                    break
+                }
+            }
+        }
+
+        // Kural 2: Rakibin taşını çalma fırsatı varsa
+        if (bestMoveIndex == -1) {
+            for (i in 7..12) {
+                if (board[i] > 0) {
+                    val finalPocketIndex = (i + board[i] - 1) % board.size
+                    if (finalPocketIndex in 0..5) {
+                        // Eğer son taş, rakibin cebindeki taşları çift yapıyorsa
+                        if ((board[finalPocketIndex] + 1) % 2 == 0) {
+                            bestMoveIndex = i
+                            break
+                        }
+                    }
+                }
+            }
+        }
+
+        // Kural 3: Kendi boş kuyusuna son taşı getirme ve karşıdan taş çalma fırsatı varsa
+        if (bestMoveIndex == -1) {
+            for (i in 7..12) {
+                if (board[i] > 0) {
+                    val finalPocketIndex = (i + board[i] - 1) % board.size
+                    if (finalPocketIndex in 7..12 && board[finalPocketIndex] == 0) {
+                        val oppositePocketIndex = 12 - finalPocketIndex
+                        if (board[oppositePocketIndex] > 0) {
+                            bestMoveIndex = i
+                            break
+                        }
+                    }
+                }
+            }
+        }
+
+        // En çok taşa sahip cepten oyna (varsayılan)
+        if (bestMoveIndex == -1) {
+            var maxStones = -1
+            var possibleMoves = mutableListOf<Int>()
+            for (i in 7..12) {
+                if (board[i] > 0) {
+                    if (board[i] > maxStones) {
+                        maxStones = board[i]
+                        possibleMoves.clear()
+                        possibleMoves.add(i)
+                    } else if (board[i] == maxStones) {
+                        possibleMoves.add(i)
+                    }
+                }
+            }
+            if (possibleMoves.isNotEmpty()) {
+                bestMoveIndex = possibleMoves[Random.nextInt(possibleMoves.size)]
+            }
+        }
+
+        if (bestMoveIndex != -1) {
+            playTurn(bestMoveIndex)
+        }
     }
 
     // Oyun bitti mi kontrol etme
@@ -321,24 +408,28 @@ class MainActivity : AppCompatActivity() {
         val player2PocketsEmpty = (7..12).all { board[it] == 0 }
 
         if (player1PocketsEmpty || player2PocketsEmpty) {
-            // Oyun bitti - kalan taşlar diğer oyuncunun haznesine gider
-            for (i in 0..5) {
-                board[6] += board[i]
-                board[i] = 0
-            }
-            for (i in 7..12) {
-                board[13] += board[i]
-                board[i] = 0
+            // KURAL 4: Oyunculardan herhangi birinin bölgesi boşaldığında, rakibinin bölgesindeki tüm taşları kazanır.
+            if (player1PocketsEmpty) {
+                for (i in 7..12) {
+                    board[6] += board[i]
+                    board[i] = 0
+                }
+            } else if (player2PocketsEmpty) {
+                for (i in 0..5) {
+                    board[13] += board[i]
+                    board[i] = 0
+                }
             }
 
+            // Oyun sonu mesajını belirle ve oyunu bitir
             val winnerMessage = when {
                 board[6] > board[13] -> "Oyuncu 1 Kazandı! Skor: ${board[6]} - ${board[13]}"
                 board[13] > board[6] -> "Oyuncu 2 Kazandı! Skor: ${board[13]} - ${board[6]}"
                 else -> "Oyun Berabere Bitti! Skor: ${board[6]} - ${board[13]}"
             }
             statusText.text = winnerMessage
-            pockets.forEach { it.isEnabled = false } // Oyun bitince cepleri devre dışı bırak
-            isMoving = true // Oyun bittiğinde hamle yapılmasını engelle
+            pockets.forEach { it.isEnabled = false }
+            isMoving = true
         }
     }
 
@@ -352,12 +443,10 @@ class MainActivity : AppCompatActivity() {
             if ((currentPlayer == 1 && pocketIndex in 0..5) || (currentPlayer == 2 && pocketIndex in 7..12)) {
                 button.isEnabled = true
                 button.alpha = 1.0f
-                // Vurgu için metin rengini sarı yap
                 button.setTextColor(ContextCompat.getColor(this, R.color.yellow))
             } else {
                 button.isEnabled = false
                 button.alpha = 0.5f
-                // Normal durum için metin rengini beyaz yap
                 button.setTextColor(Color.WHITE)
             }
         }
@@ -366,14 +455,13 @@ class MainActivity : AppCompatActivity() {
 
         // Sıra metnini güncelle
         if (!isMoving) {
-            statusText.text = "Sıra: Oyuncu $currentPlayer"
-        }
-
-        // `statusText`'in rotasyonunu oyuncuya göre ayarla
-        if (currentPlayer == 1) {
-            statusText.rotation = 0f
-        } else {
-            statusText.rotation = 180f
+            if (currentPlayer == 1) {
+                statusText.text = "Sıra: Oyuncu 1"
+                statusText.rotation = 0f
+            } else {
+                statusText.text = if (isSinglePlayer) "Sıra: Bilgisayar" else "Sıra: Oyuncu 2"
+                statusText.rotation = 180f
+            }
         }
     }
 }
