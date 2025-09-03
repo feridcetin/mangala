@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="176dp"
-    android:background="@drawable/side_nav_bar"
+    android:background="@drawable/mangala_bg"
     android:gravity="bottom"
     android:orientation="vertical"
     android:paddingLeft="16dp"
@@ -19,11 +19,11 @@
         android:textColor="@android:color/white"
         android:textSize="20sp" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Uygulama Bilgileri"
-        android:textColor="@android:color/white"
-        android:textSize="14sp" />
+<!--    <TextView-->
+<!--        android:id="@+id/textView"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Uygulama Bilgileri"-->
+<!--        android:textColor="@android:color/white"-->
+<!--        android:textSize="14sp" />-->
 </LinearLayout>

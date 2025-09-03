@@ -160,6 +160,13 @@ class MainActivity : AppCompatActivity() {
                     drawerLayout.closeDrawers()
                     true
                 }
+                R.id.action_logout -> {
+                // Çıkış yapma menü öğesi seçildiğinde burası çalışır.
+                //Toast.makeText(this, "Çıkış Yap'a tıklandı! Uygulamadan çıkış yapılıyor...", Toast.LENGTH_SHORT).show()
+                // Buraya gerçek çıkış yapma (örneğin, Firebase Auth'tan signOut() metodu) mantığını ekleyebilirsiniz.
+                finishAffinity()
+                true
+            }
                 else -> false
             }
         }
