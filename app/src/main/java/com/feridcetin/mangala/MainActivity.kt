@@ -36,13 +36,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var store1: TextView
     private lateinit var store2: TextView
     private lateinit var statusText: TextView
-    private lateinit var resetButton: Button
-
+    //private lateinit var resetButton: Button
     private lateinit var menuButton: Button
     private lateinit var player1StonesCountText: TextView
     private lateinit var player2StonesCountText: TextView
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
+
+    // Set skorları ve set bilgisi
+    private lateinit var setScoreText: TextView
+    private var player1SetsWon = 0
+    private var player2SetsWon = 0
+    private var currentSet = 1
 
     // Ses efektleri için SoundPool
     private lateinit var soundPool: SoundPool
@@ -104,12 +109,13 @@ class MainActivity : AppCompatActivity() {
         store1 = findViewById(R.id.textView_store1)
         store2 = findViewById(R.id.textView_store2)
         statusText = findViewById(R.id.textView_status)
-        resetButton = findViewById(R.id.button_reset)
+        //resetButton = findViewById(R.id.button_reset)
         menuButton = findViewById(R.id.button_open_menu)
         player1StonesCountText = findViewById(R.id.textView_sayi1)
         player2StonesCountText = findViewById(R.id.textView_sayi2)
         drawerLayout = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.nav_view)
+        setScoreText = findViewById(R.id.textView_set_score)
 
         // Menü butonu tıklama dinleyicisi
         menuButton.setOnClickListener {
@@ -157,9 +163,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        resetButton.setOnClickListener {
+        /*resetButton.setOnClickListener {
             resetGame()
-        }
+        }*/
 
         // Oyunu başlat
         resetGame()
@@ -170,12 +176,19 @@ class MainActivity : AppCompatActivity() {
         soundPool.release()
     }
 
-    // Oyunu sıfırlama fonksiyonu
+    // Oyunu sıfırlama fonksiyonu (Toplam maçı sıfırlar)
     private fun resetGame() {
+        player1SetsWon = 0
+        player2SetsWon = 0
+        currentSet = 1
+        resetSet()
+    }
+
+    // Seti sıfırlama fonksiyonu
+    private fun resetSet() {
         board = intArrayOf(4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0)
         currentPlayer = 1
         isMoving = false
-        isSinglePlayer = false
         player1StonesCountText.visibility = View.INVISIBLE
         player2StonesCountText.visibility = View.INVISIBLE
         updateUI()
@@ -402,7 +415,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Oyun bitti mi kontrol etme
+    // Setin bitip bitmediğini kontrol etme
     private fun checkGameOver() {
         val player1PocketsEmpty = (0..5).all { board[it] == 0 }
         val player2PocketsEmpty = (7..12).all { board[it] == 0 }
@@ -421,15 +434,37 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Oyun sonu mesajını belirle ve oyunu bitir
-            val winnerMessage = when {
-                board[6] > board[13] -> "Oyuncu 1 Kazandı! Skor: ${board[6]} - ${board[13]}"
-                board[13] > board[6] -> "Oyuncu 2 Kazandı! Skor: ${board[13]} - ${board[6]}"
-                else -> "Oyun Berabere Bitti! Skor: ${board[6]} - ${board[13]}"
+            // Set sonu
+            val setWinnerMessage = when {
+                board[6] > board[13] -> {
+                    player1SetsWon++
+                    "Set Bitti! Oyuncu 1 Kazandı!"
+                }
+                board[13] > board[6] -> {
+                    player2SetsWon++
+                    "Set Bitti! Oyuncu 2 Kazandı!"
+                }
+                else -> "Set Berabere Bitti!"
             }
-            statusText.text = winnerMessage
-            pockets.forEach { it.isEnabled = false }
-            isMoving = true
+
+            // Genel oyunun bitip bitmediğini kontrol et
+            if (currentSet < 5) {
+                Toast.makeText(this, setWinnerMessage, Toast.LENGTH_SHORT).show()
+                handler.postDelayed({
+                    currentSet++
+                    resetSet()
+                }, 2000)
+            } else {
+                // Oyunun genel kazananını belirle
+                val finalWinnerMessage = when {
+                    player1SetsWon > player2SetsWon -> "Maç Bitti! Oyuncu 1 ${player1SetsWon}-${player2SetsWon} ile Kazandı!"
+                    player2SetsWon > player1SetsWon -> "Maç Bitti! Oyuncu 2 ${player2SetsWon}-${player1SetsWon} ile Kazandı!"
+                    else -> "Maç Berabere Bitti!"
+                }
+                statusText.text = finalWinnerMessage
+                pockets.forEach { it.isEnabled = false }
+                isMoving = true
+            }
         }
     }
 
@@ -463,5 +498,6 @@ class MainActivity : AppCompatActivity() {
                 statusText.rotation = 180f
             }
         }
+        setScoreText.text = "Set: $currentSet / 5\nSkor: $player1SetsWon - $player2SetsWon"
     }
 }

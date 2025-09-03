@@ -134,22 +134,38 @@
                     android:layout_gravity="center_horizontal"
                     android:rotation="180" />
 
-                <!-- Sıra ve sıfırlama butonu için yeni yatay düzen -->
+                <!-- Sıra ve menü butonu için yatay düzen -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginVertical="8dp">
 
                     <TextView
                         android:id="@+id/textView_status"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:layout_marginVertical="8dp"
                         android:text="Sıra: Oyuncu 1"
                         android:textColor="@android:color/black"
                         android:textSize="24sp"
                         android:textStyle="bold" />
+                    <!-- Set ve Skor Bilgisi -->
+                    <TextView
+                        android:id="@+id/textView_set_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Set: 1 / 5\nSkor: 0 - 0"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/textView_status"
+                        android:layout_weight="1" />
 
                     <Button
                         android:id="@+id/button_open_menu"
@@ -161,12 +177,6 @@
                         android:textColor="@color/white"
                         android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/button_reset"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sıfırla"
-                        android:layout_marginStart="16dp" />
                 </LinearLayout>
 
                 <TextView
