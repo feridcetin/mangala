@@ -41,4 +41,7 @@
         <item name="android:paddingBottom">8dp</item>
         <item name="android:textStyle">bold</item>
     </style>
+    <style name="NavigationDrawerTextStyle" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>

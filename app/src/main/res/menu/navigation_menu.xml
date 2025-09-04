@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:checkableBehavior="single"
+        app:itemTextAppearance="@style/NavigationDrawerTextStyle">
+
+        <item
+            android:id="@+id/nav_single_player"
+            android:icon="@android:drawable/ic_menu_today"
+            android:title="Tek Kişilik Oyun" />
+
+        <item
+            android:id="@+id/nav_multi_player"
+            android:icon="@android:drawable/ic_menu_recent_history"
+            android:title="İki Kişilik Oyun" />
+
+        <item
+            android:id="@+id/nav_change_names"
+            android:icon="@android:drawable/ic_menu_edit"
+            android:title="İsimleri Değiştir" />
+
+        <item
+            android:id="@+id/nav_how_to_play"
+            android:icon="@android:drawable/ic_menu_help"
+            android:title="Nasıl Oynanır?" />
+
+    </group>
+
+    <item android:title="Oyun Ayarları"
+        app:itemTextAppearance="@style/NavigationDrawerTextStyle">
+        <menu>
+            <item
+                android:id="@+id/nav_reset"
+                android:icon="@android:drawable/ic_menu_close_clear_cancel"
+                android:title="Seti Sıfırla" />
+            <item
+                android:id="@+id/action_logout"
+                android:icon="@android:drawable/ic_menu_close_clear_cancel"
+                android:title="Çıkış Yap" />
+        </menu>
+    </item>
+</menu>

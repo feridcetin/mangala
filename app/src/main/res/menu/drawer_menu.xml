@@ -5,13 +5,18 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_how_to_play"
+            android:title="Nasıl Oynanır?"
+            android:icon="@android:drawable/ic_menu_help"/>
+
+        <item
             android:id="@+id/nav_reset"
             android:icon="@drawable/ic_baseline_refresh_24"
             android:title="Oyunu Yeniden Başlat" />
         <item
             android:id="@+id/nav_single_player"
             android:icon="@drawable/ic_baseline_person_24"
-            android:title="Tek Oyunculu Mod" />
+            android:title="Tek Oyunculu Mod"/>
         <item
             android:id="@+id/nav_multi_player"
             android:icon="@drawable/ic_baseline_group_24"

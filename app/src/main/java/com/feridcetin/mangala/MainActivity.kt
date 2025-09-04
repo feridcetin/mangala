@@ -29,8 +29,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import kotlin.random.Random
 import android.app.AlertDialog
+import android.content.Context
+import android.content.SharedPreferences
 import android.widget.EditText
 import android.text.InputType
+import android.text.Html
 
 class MainActivity : AppCompatActivity() {
 
@@ -71,8 +74,17 @@ class MainActivity : AppCompatActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
 
+
+    private lateinit var sharedPreferences: SharedPreferences
+
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPreferences = getSharedPreferences("OyunAyarlari", Context.MODE_PRIVATE)
+
+        player1Name = sharedPreferences.getString("player1Name", "Oyuncu 1")!!
+
+        player2Name = sharedPreferences.getString("player2Name", "Oyuncu 2")!!
+
         super.onCreate(savedInstanceState)
         // Ekranı yatay moda ayarlama
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -160,6 +172,11 @@ class MainActivity : AppCompatActivity() {
                     drawerLayout.closeDrawers()
                     true
                 }
+                R.id.nav_how_to_play -> {
+                    showHowToPlayDialog()
+                    drawerLayout.closeDrawers()
+                    true
+                }
                 R.id.action_logout -> {
                 // Çıkış yapma menü öğesi seçildiğinde burası çalışır.
                 //Toast.makeText(this, "Çıkış Yap'a tıklandı! Uygulamadan çıkış yapılıyor...", Toast.LENGTH_SHORT).show()
@@ -224,9 +241,11 @@ class MainActivity : AppCompatActivity() {
 
                 if (newPlayer1Name.isNotEmpty()) {
                     player1Name = newPlayer1Name
+                    sharedPreferences.edit().putString("player1Name", newPlayer1Name).apply()
                 }
                 if (newPlayer2Name.isNotEmpty()) {
                     player2Name = newPlayer2Name
+                    sharedPreferences.edit().putString("player2Name", newPlayer2Name).apply()
                 }
                 Toast.makeText(this, "İsimler güncellendi!", Toast.LENGTH_SHORT).show()
                 updateUI()
@@ -234,7 +253,33 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("İptal", null)
             .show()
     }
+    private fun showHowToPlayDialog() {
+        val rulesText = """
+            <b>Oyunun Amacı:</b> Rakibinizden daha fazla taş toplamak.
+            <br><br>
+            <b>Oyunun Kuralları:</b>
+            <br><br>
+            1. <b>Başlangıç:</b> Her cepte 4 taş bulunur. Sırasıyla oyuncular kendi ceplerinden taş alıp dağıtır.
+            <br><br>
+            2. <b>Hamle:</b> Seçtiğiniz cebin içindeki tüm taşları alıp, saatin tersi yönünde her cebe birer tane bırakırsınız.
+            <br><br>
+            3. <b>Ekstra Hamle:</b> Son taşınızı kendi hazinenize (büyük kuyu) bırakırsanız, bir tur daha oynama hakkı kazanırsınız.
+            <br><br>
+            4. <b>Taş Çalma (Çift Kuralı):</b> Son taşınız, rakibinizin bölgesindeki boş olmayan bir cebe düşer ve o cebe düşen taşla birlikte toplam taş sayısı çift olursa, o cepteki tüm taşları ve bu hamleyle koyduğunuz son taşı kendi hazinenize alırsınız.
+            <br><br>
+            5. <b>Taş Çalma (Boş Cep Kuralı):</b> Son taşınız kendi bölgenizdeki boş bir cebe düşerse, hem o cebe koyduğunuz taşı hem de karşı cepteki (rakibinizin) tüm taşları alıp kendi hazinenize koyarsınız.
+            <br><br>
+            6. <b>Oyunun Sonu:</b> Oyuncunun ceplerinden herhangi biri boşaldığında oyun biter. Kendi cepleri boş kalan oyuncu, rakibinin ceplerinde kalan tüm taşları alır.
+            <br><br>
+            <b>Kazanan:</b> En fazla taşa sahip olan oyuncu seti kazanır. 5 set sonunda en çok seti kazanan maçı kazanır.
+        """.trimIndent()
 
+        AlertDialog.Builder(this)
+            .setTitle("Nasıl Oynanır?")
+            .setMessage(Html.fromHtml(rulesText, Html.FROM_HTML_MODE_COMPACT))
+            .setPositiveButton("Anladım", null)
+            .show()
+    }
     // Oyunu sıfırlama fonksiyonu (Toplam maçı sıfırlar)
     private fun resetGame() {
         player1SetsWon = 0
