@@ -34,6 +34,7 @@ import android.content.SharedPreferences
 import android.widget.EditText
 import android.text.InputType
 import android.text.Html
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : AppCompatActivity() {
 
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         player1Name = sharedPreferences.getString("player1Name", "Oyuncu 1")!!
 
         player2Name = sharedPreferences.getString("player2Name", "Oyuncu 2")!!
-
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         // Ekranı yatay moda ayarlama
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -207,6 +208,7 @@ class MainActivity : AppCompatActivity() {
 
         // Oyunu başlat
         resetGame()
+        bindPocketMap()
     }
 
     override fun onDestroy() {
@@ -389,6 +391,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         handler.post(runnable)
+
+
+        board[currentIndex]++
+        soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+        pulsePocket(currentIndex)
+
     }
 
     // Oyun kurallarını uygulayan fonksiyon
@@ -604,4 +612,42 @@ class MainActivity : AppCompatActivity() {
         }
         setScoreText.text = "Set: $currentSet / 5\nSkor: $player1SetsWon - $player2SetsWon"
     }
+
+    private val pocketButtonByBoardIndex: Array<Button?> = arrayOfNulls(14)
+
+    private fun bindPocketMap() {
+        // board index -> button eşlemesi
+        pocketButtonByBoardIndex[0] = findViewById(R.id.button_pocket0)
+        pocketButtonByBoardIndex[1] = findViewById(R.id.button_pocket1)
+        pocketButtonByBoardIndex[2] = findViewById(R.id.button_pocket2)
+        pocketButtonByBoardIndex[3] = findViewById(R.id.button_pocket3)
+        pocketButtonByBoardIndex[4] = findViewById(R.id.button_pocket4)
+        pocketButtonByBoardIndex[5] = findViewById(R.id.button_pocket5)
+
+        pocketButtonByBoardIndex[7] = findViewById(R.id.button_pocket7)
+        pocketButtonByBoardIndex[8] = findViewById(R.id.button_pocket8)
+        pocketButtonByBoardIndex[9] = findViewById(R.id.button_pocket9)
+        pocketButtonByBoardIndex[10] = findViewById(R.id.button_pocket10)
+        pocketButtonByBoardIndex[11] = findViewById(R.id.button_pocket11)
+        pocketButtonByBoardIndex[12] = findViewById(R.id.button_pocket12)
+    }
+
+    private fun pulsePocket(boardIndex: Int) {
+        val v = pocketButtonByBoardIndex[boardIndex] ?: return
+        v.animate().cancel()
+
+        v.animate()
+            .scaleX(1.08f)
+            .scaleY(1.08f)
+            .setDuration(90)
+            .withEndAction {
+                v.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(120)
+                    .start()
+            }
+            .start()
+    }
+
 }

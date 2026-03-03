@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#A67B5B">
+        android:background="@drawable/bg_board_surface">
 
         <TextView
             android:id="@+id/textView_store2"
@@ -76,44 +76,44 @@
                     android:padding="8dp"
                     android:rotation="180">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket7"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket8"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket9"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket10"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket11"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket12"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
@@ -201,44 +201,46 @@
                     android:background="@drawable/player_area_background_green"
                     android:padding="8dp">
 
-                    <Button
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket0"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
-                        android:layout_height="80dp"
+                        android:layout_height="76dp"
                         android:layout_weight="1"
-                        tools:text="4" />
-                    <Button
+                        android:text="4"/>
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket1"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket2"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket3"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket4"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
                         tools:text="4" />
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket5"
-                        style="@style/MangalaPocketButton"
+                        style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:layout_weight="1"
@@ -255,7 +257,10 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:background="@drawable/nav_drawer_bg"
         app:headerLayout="@layout/nav_header_main"
+        app:itemTextColor="@android:color/white"
+        app:itemIconTint="@android:color/white"
         app:menu="@menu/drawer_menu"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>
