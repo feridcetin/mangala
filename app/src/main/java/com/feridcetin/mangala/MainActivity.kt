@@ -80,13 +80,15 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
+        super.onCreate(savedInstanceState)
+
+
         sharedPreferences = getSharedPreferences("OyunAyarlari", Context.MODE_PRIVATE)
 
         player1Name = sharedPreferences.getString("player1Name", "Oyuncu 1")!!
 
         player2Name = sharedPreferences.getString("player2Name", "Oyuncu 2")!!
-        installSplashScreen()
-        super.onCreate(savedInstanceState)
         // Ekranı yatay moda ayarlama
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         // Uygulamayı tam ekran yapmak için gerekli kod
@@ -349,7 +351,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Taşları animasyonlu bir şekilde dağıtma
-    private fun distributeSeedsAnimated(startIndex: Int, remainingStones: Int) {
+    /*private fun distributeSeedsAnimated(startIndex: Int, remainingStones: Int) {
         var currentIndex = startIndex
         var stonesLeft = remainingStones
         var lastIndex = -1
@@ -396,7 +398,53 @@ class MainActivity : AppCompatActivity() {
         board[currentIndex]++
         soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
         pulsePocket(currentIndex)
+    }
+    */
+    private fun distributeSeedsAnimated(startIndex: Int, remainingStones: Int) {
+        var currentIndex = startIndex
+        var stonesLeft = remainingStones
+        var lastIndex = -1
 
+        val runnable = object : Runnable {
+            override fun run() {
+                if (stonesLeft == 0) {
+                    isMoving = false
+                    player1StonesCountText.visibility = View.INVISIBLE
+                    player2StonesCountText.visibility = View.INVISIBLE
+                    applyGameRules(lastIndex)
+                    return
+                }
+
+                currentIndex = (currentIndex + 1) % board.size
+
+                // Rakibin haznesini atla
+                if (currentPlayer == 1 && currentIndex == 13) {
+                    currentIndex = (currentIndex + 1) % board.size
+                } else if (currentPlayer == 2 && currentIndex == 6) {
+                    currentIndex = (currentIndex + 1) % board.size
+                }
+
+                board[currentIndex]++
+                soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+
+                // ✅ Pulse burada olmalı
+                pulsePocket(currentIndex)
+
+                lastIndex = currentIndex
+                stonesLeft--
+
+                if (currentPlayer == 1) {
+                    player1StonesCountText.text = stonesLeft.toString()
+                } else {
+                    player2StonesCountText.text = stonesLeft.toString()
+                }
+
+                updateUI()
+                handler.postDelayed(this, 300)
+            }
+        }
+
+        handler.post(runnable)
     }
 
     // Oyun kurallarını uygulayan fonksiyon
