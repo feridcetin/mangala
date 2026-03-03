@@ -38,6 +38,19 @@
         <item name="windowSplashScreenAnimationDuration">1000</item>
         <item name="postSplashScreenTheme">@style/Theme.Mangala</item>
 
+
+
+
+        <!-- ✅ Arka planı modern pocket drawable yap -->
+        <item name="android:background">@drawable/pocket_bg_modern</item>
+
+        <!-- ✅ Ripple (dokunma/etkileşim hissi) -->
+        <item name="rippleColor">#55FFC107</item>
+
+        <!-- ✅ Elevation: scale ile birleşince çok daha görünür olur -->
+        <item name="android:elevation">6dp</item>
+
+        <item name="android:foreground">@drawable/pocket_foreground_ripple</item>
     </style>
 
     <!-- Night theme mapping -->
@@ -86,6 +99,20 @@
 
         <!-- tonal yüzey hissi -->
         <item name="backgroundTint">?attr/colorSurfaceVariant</item>
+
+
+
+
+        <!-- ✅ Arka planı modern pocket drawable yap -->
+        <item name="android:background">@drawable/pocket_bg_modern</item>
+
+        <!-- ✅ Ripple (dokunma/etkileşim hissi) -->
+        <item name="rippleColor">#55FFC107</item>
+
+        <!-- ✅ Elevation: scale ile birleşince çok daha görünür olur -->
+        <item name="android:elevation">6dp</item>
+        <item name="android:foreground">@drawable/pocket_foreground_ripple</item>
+
     </style>
 
     <style name="ShapeAppearance.Mangala.Pocket" parent="ShapeAppearance.Material3.LargeComponent">
