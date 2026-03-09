@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -30,9 +29,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 
     buildFeatures {
         viewBinding = true
@@ -55,5 +51,5 @@ dependencies {
 
     // Modern SplashScreen API (Android 12+ uyumlu)
     implementation("androidx.core:core-splashscreen:1.0.1")
-
+    implementation("com.google.android.gms:play-services-ads:24.9.0")
 }

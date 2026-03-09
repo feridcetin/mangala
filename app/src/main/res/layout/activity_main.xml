@@ -15,6 +15,21 @@
         android:layout_height="match_parent"
         android:background="@drawable/bg_board_surface">
 
+        <!-- ✅ Banner container: SOL ŞERİT -->
+
+        <FrameLayout
+            android:id="@+id/ad_view_container"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:padding="0dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+
         <TextView
             android:id="@+id/textView_store2"
             android:layout_width="80dp"
@@ -26,10 +41,10 @@
             android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:rotation="180"
+            app:layout_constraintStart_toEndOf="@id/ad_view_container"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             tools:text="15" />
 
         <TextView
@@ -43,9 +58,9 @@
             android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             tools:text="15" />
 
         <LinearLayout
@@ -54,10 +69,10 @@
             android:layout_height="0dp"
             android:orientation="horizontal"
             android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textView_store1"
             app:layout_constraintStart_toEndOf="@+id/textView_store2"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintEnd_toStartOf="@+id/textView_store1">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -152,7 +167,7 @@
                         android:textColor="@android:color/black"
                         android:textSize="24sp"
                         android:textStyle="bold" />
-                    <!-- Set ve Skor Bilgisi -->
+
                     <TextView
                         android:id="@+id/textView_set_score"
                         android:layout_width="wrap_content"
@@ -162,9 +177,6 @@
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textView_status"
                         android:layout_weight="1" />
 
                     <Button
@@ -176,7 +188,6 @@
                         android:backgroundTint="@color/purple_500"
                         android:textColor="@color/white"
                         android:textStyle="bold" />
-
                 </LinearLayout>
 
                 <TextView
@@ -201,14 +212,13 @@
                     android:background="@drawable/player_area_background_green"
                     android:padding="8dp">
 
-
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket0"
                         style="@style/Widget.Mangala.Pocket"
                         android:layout_width="0dp"
                         android:layout_height="76dp"
                         android:layout_weight="1"
-                        android:text="4"/>
+                        tools:text="4" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_pocket1"
@@ -246,11 +256,14 @@
                         android:layout_weight="1"
                         tools:text="4" />
                 </LinearLayout>
+
             </LinearLayout>
         </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Navigasyon Menüsü -->
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
@@ -258,9 +271,12 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         android:background="@drawable/nav_drawer_bg"
+        android:elevation="30dp"
+        android:translationZ="30dp"
+        app:menu="@menu/drawer_menu"
         app:headerLayout="@layout/nav_header_main"
         app:itemTextColor="@android:color/white"
-        app:itemIconTint="@android:color/white"
-        app:menu="@menu/drawer_menu"/>
+        app:itemIconTint="@android:color/white"/>
+
 
 </androidx.drawerlayout.widget.DrawerLayout>

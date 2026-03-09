@@ -1,49 +1,58 @@
 package com.feridcetin.mangala
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import android.widget.Toast
-import android.graphics.Color
-import androidx.core.content.ContextCompat
-import android.content.pm.ActivityInfo
-import android.view.MenuItem
-import android.widget.LinearLayout
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import com.google.android.material.navigation.NavigationView
-import android.view.Gravity
-import android.media.SoundPool
-import android.media.AudioAttributes
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import kotlin.random.Random
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.widget.EditText
-import android.text.InputType
+import android.content.pm.ActivityInfo
+import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.SoundPool
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Html
+import android.text.InputType
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
+import kotlin.random.Random
+
+// Google Mobile Ads
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+
+// (İstersen splash'i tamamen bırak demiştin; sende hâlâ var. Kalsın istiyorsan sorun yok.)
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : AppCompatActivity() {
+
+    private var bannerAdView: AdView? = null
 
     // Oyunun durumunu tutan değişkenler
     private lateinit var pockets: List<Button>
     private lateinit var store1: TextView
     private lateinit var store2: TextView
     private lateinit var statusText: TextView
-    //private lateinit var resetButton: Button
     private lateinit var menuButton: Button
     private lateinit var player1StonesCountText: TextView
     private lateinit var player2StonesCountText: TextView
@@ -56,42 +65,39 @@ class MainActivity : AppCompatActivity() {
     private var player2SetsWon = 0
     private var currentSet = 1
 
-    // Oyuncu isimleri için yeni değişkenler
+    // Oyuncu isimleri
     private var player1Name = "Oyuncu 1"
     private var player2Name = "Oyuncu 2"
 
-    // Ses efektleri için SoundPool
+    // Ses
     private lateinit var soundPool: SoundPool
     private var stoneSoundId: Int = 0
 
-    // 0-5 Oyuncu 1 cepleri
-    // 6 Oyuncu 1 haznesi
-    // 7-12 Oyuncu 2 cepleri
-    // 13 Oyuncu 2 haznesi
+    // board
     private var board = IntArray(14)
     private var currentPlayer = 1
     private var isMoving = false
     private var isSinglePlayer = false
 
     private val handler = Handler(Looper.getMainLooper())
-
-
     private lateinit var sharedPreferences: SharedPreferences
 
+    // Interstitial
+    private var interstitialAd: InterstitialAd? = null
+    private var lastInterstitialShownAt = 0L
+
     @SuppressLint("WrongConstant")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-
         sharedPreferences = getSharedPreferences("OyunAyarlari", Context.MODE_PRIVATE)
-
         player1Name = sharedPreferences.getString("player1Name", "Oyuncu 1")!!
-
         player2Name = sharedPreferences.getString("player2Name", "Oyuncu 2")!!
-        // Ekranı yatay moda ayarlama
+
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        // Uygulamayı tam ekran yapmak için gerekli kod
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController?.let {
@@ -100,18 +106,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_main)
-
-        // Ses efektleri için SoundPool'u başlat
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_GAME)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
-
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(10)
-            .setAudioAttributes(audioAttributes)
-            .build()
-        stoneSoundId = soundPool.load(this, R.raw.stone_sound, 1)
 
         // UI bileşenlerini bağla
         pockets = listOf(
@@ -125,13 +119,13 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.button_pocket8),
             findViewById(R.id.button_pocket9),
             findViewById(R.id.button_pocket10),
-            R.id.button_pocket11.let { findViewById(it) },
+            findViewById(R.id.button_pocket11),
             findViewById(R.id.button_pocket12)
         )
+
         store1 = findViewById(R.id.textView_store1)
         store2 = findViewById(R.id.textView_store2)
         statusText = findViewById(R.id.textView_status)
-        //resetButton = findViewById(R.id.button_reset)
         menuButton = findViewById(R.id.button_open_menu)
         player1StonesCountText = findViewById(R.id.textView_sayi1)
         player2StonesCountText = findViewById(R.id.textView_sayi2)
@@ -139,12 +133,33 @@ class MainActivity : AppCompatActivity() {
         navigationView = findViewById(R.id.nav_view)
         setScoreText = findViewById(R.id.textView_set_score)
 
-        // Menü butonu tıklama dinleyicisi
+        // ✅ Ads: Banner Drawer içinde, Interstitial set sonunda
+        preloadInterstitial()
+
+        loadBanner()
+
+
+        // SoundPool
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(10)
+            .setAudioAttributes(audioAttributes)
+            .build()
+        stoneSoundId = soundPool.load(this, R.raw.stone_sound, 1)
+
+
         menuButton.setOnClickListener {
-            drawerLayout.openDrawer(GravityCompat.START)
+            //Toast.makeText(this, "Menü tıklandı", Toast.LENGTH_SHORT).show()
+            navigationView.bringToFront()
+            drawerLayout.requestLayout()
+            drawerLayout.openDrawer(navigationView, true)
         }
 
-        // Navigation View menü öğesi tıklama dinleyicisi
+
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_reset -> {
@@ -155,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_single_player -> {
                     resetGame()
                     isSinglePlayer = true
-                    player2Name = "Bilgisayar" // Tek oyunculu modda 2. oyuncu ismini ayarla
+                    player2Name = "Bilgisayar"
                     Toast.makeText(this, "Tekli oyun modu başlatıldı.", Toast.LENGTH_SHORT).show()
                     drawerLayout.closeDrawers()
                     updateUI()
@@ -164,7 +179,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_multi_player -> {
                     resetGame()
                     isSinglePlayer = false
-                    player2Name = "Oyuncu 2" // Çok oyunculu modda 2. oyuncu ismini sıfırla
+                    player2Name = "Oyuncu 2"
                     Toast.makeText(this, "İkili oyun modu başlatıldı.", Toast.LENGTH_SHORT).show()
                     drawerLayout.closeDrawers()
                     updateUI()
@@ -181,17 +196,13 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.action_logout -> {
-                // Çıkış yapma menü öğesi seçildiğinde burası çalışır.
-                //Toast.makeText(this, "Çıkış Yap'a tıklandı! Uygulamadan çıkış yapılıyor...", Toast.LENGTH_SHORT).show()
-                // Buraya gerçek çıkış yapma (örneğin, Firebase Auth'tan signOut() metodu) mantığını ekleyebilirsiniz.
-                finishAffinity()
-                true
-            }
+                    finishAffinity()
+                    true
+                }
                 else -> false
             }
         }
 
-        // Butonlara tıklama olay dinleyicisi ekle
         pockets.forEachIndexed { index, button ->
             button.setOnClickListener {
                 if (isMoving) return@setOnClickListener
@@ -204,21 +215,147 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        /*resetButton.setOnClickListener {
-            resetGame()
-        }*/
-
-        // Oyunu başlat
         resetGame()
         bindPocketMap()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        soundPool.release()
+
+    // ============ ADS ============
+
+    private fun loadBannerInDrawerHeader() {
+        MobileAds.initialize(this)
+
+        // Header view hazır mı? Değilse inflate eder.
+        val headerView = if (navigationView.headerCount > 0) {
+            navigationView.getHeaderView(0)
+        } else {
+            navigationView.inflateHeaderView(R.layout.nav_header_main)
+        }
+
+        val adContainer = headerView.findViewById<FrameLayout>(R.id.ad_view_container)
+
+        val adView = AdView(this)
+        adView.adUnitId = "ca-app-pub-3940256099942544/9214589741" // ✅ Test banner [1](https://developer.android.com/latest-updates/)
+        adView.setAdSize(AdSize.MEDIUM_RECTANGLE)
+
+        adContainer.removeAllViews()
+        adContainer.addView(adView)
+
+        adView.loadAd(AdRequest.Builder().build())
+        bannerAdView = adView
     }
 
-    // Oyuncu isimlerini değiştirmek için diyalog penceresi gösterir
+    private fun loadBannerInDrawer() {
+        MobileAds.initialize(this)
+
+        val headerView = navigationView.getHeaderView(0)
+        val adContainer = headerView.findViewById<FrameLayout>(R.id.ad_view_container)
+
+        val adView = AdView(this)
+        adView.adUnitId = "ca-app-pub-2120666198065087/5263827432"
+
+        // Drawer içinde en düzenli: 300x250
+        adView.setAdSize(AdSize.MEDIUM_RECTANGLE)
+
+        adContainer.removeAllViews()
+        adContainer.addView(adView)
+
+        adView.loadAd(AdRequest.Builder().build())
+        bannerAdView = adView
+    }
+
+
+    private fun loadBanner() {
+        // Google banner kurulumu: container içine AdView ekleme yaklaşımı doğru. [1](https://developer.android.com/latest-updates/)
+        MobileAds.initialize(this)
+
+        val adContainer = findViewById<FrameLayout>(R.id.ad_view_container)
+        val adView = AdView(this)
+
+        // ✅ Banner unit id (prod)
+        adView.adUnitId = "ca-app-pub-2120666198065087/5263827432"
+
+        // ✅ SOL şerit için sabit boy: 300x250
+        adView.setAdSize(AdSize.MEDIUM_RECTANGLE)
+
+        adContainer.removeAllViews()
+        adContainer.addView(adView)
+
+        adView.loadAd(AdRequest.Builder().build())
+        bannerAdView = adView
+    }
+
+    private fun preloadInterstitial() {
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            this,
+            "ca-app-pub-2120666198065087/8926430766",
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    interstitialAd = ad
+                }
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    interstitialAd = null
+                }
+            }
+        )
+    }
+
+    private fun showInterstitialIfReady(onContinue: () -> Unit) {
+        // Play/AdMob önerisi: interstitial doğal geçişlerde + aşırı sık olmamalı. [2](https://sgs-my.sharepoint.com/personal/ferid_cetin_sgs_com/Documents/Microsoft%20Copilot%20Chat%20Files/ic_person.xml)[3](https://sgs-my.sharepoint.com/personal/ferid_cetin_sgs_com/Documents/Microsoft%20Copilot%20Chat%20Files/pocket_background_oval_player1.xml)[4](https://deepwiki.com/googleads/googleads-mobile-android-examples/4-banner-ads)
+        val now = System.currentTimeMillis()
+        if (now - lastInterstitialShownAt < 60_000) {
+            onContinue()
+            return
+        }
+
+        val ad = interstitialAd
+        if (ad == null) {
+            onContinue()
+            preloadInterstitial()
+            return
+        }
+
+        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                interstitialAd = null
+                preloadInterstitial()
+                onContinue()
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                interstitialAd = null
+                preloadInterstitial()
+                onContinue()
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                lastInterstitialShownAt = System.currentTimeMillis()
+            }
+        }
+
+        ad.show(this)
+    }
+
+    override fun onPause() {
+        bannerAdView?.pause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bannerAdView?.resume()
+    }
+
+    override fun onDestroy() {
+        bannerAdView?.destroy()
+        soundPool.release()
+        super.onDestroy()
+    }
+
+    // ============ OYUN (mevcut kodun) ============
+
     private fun showNameChangeDialog() {
         val dialogView = LinearLayout(this)
         dialogView.orientation = LinearLayout.VERTICAL
@@ -239,7 +376,7 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Oyuncu İsimlerini Değiştir")
             .setView(dialogView)
-            .setPositiveButton("Tamam") { dialog, which ->
+            .setPositiveButton("Tamam") { _, _ ->
                 val newPlayer1Name = player1Input.text.toString().trim()
                 val newPlayer2Name = player2Input.text.toString().trim()
 
@@ -257,6 +394,7 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("İptal", null)
             .show()
     }
+
     private fun showHowToPlayDialog() {
         val rulesText = """
             <b>Oyunun Amacı:</b> Rakibinizden daha fazla taş toplamak.
@@ -269,13 +407,13 @@ class MainActivity : AppCompatActivity() {
             <br><br>
             3. <b>Ekstra Hamle:</b> Son taşınızı kendi hazinenize (büyük kuyu) bırakırsanız, bir tur daha oynama hakkı kazanırsınız.
             <br><br>
-            4. <b>Taş Çalma (Çift Kuralı):</b> Son taşınız, rakibinizin bölgesindeki boş olmayan bir cebe düşer ve o cebe düşen taşla birlikte toplam taş sayısı çift olursa, o cepteki tüm taşları ve bu hamleyle koyduğunuz son taşı kendi hazinenize alırsınız.
+            4. <b>Taş Çalma (Çift Kuralı):</b> Son taşınız rakip bölgesinde çift olursa o taşları alırsınız.
             <br><br>
-            5. <b>Taş Çalma (Boş Cep Kuralı):</b> Son taşınız kendi bölgenizdeki boş bir cebe düşerse, hem o cebe koyduğunuz taşı hem de karşı cepteki (rakibinizin) tüm taşları alıp kendi hazinenize koyarsınız.
+            5. <b>Taş Çalma (Boş Cep Kuralı):</b> Son taş kendi boş cebinize düşerse karşı cebi alırsınız.
             <br><br>
-            6. <b>Oyunun Sonu:</b> Oyuncunun ceplerinden herhangi biri boşaldığında oyun biter. Kendi cepleri boş kalan oyuncu, rakibinin ceplerinde kalan tüm taşları alır.
+            6. <b>Oyunun Sonu:</b> Bir taraf boşalınca oyun biter.
             <br><br>
-            <b>Kazanan:</b> En fazla taşa sahip olan oyuncu seti kazanır. 5 set sonunda en çok seti kazanan maçı kazanır.
+            <b>Kazanan:</b> 5 set sonunda en çok seti kazanan maçı kazanır.
         """.trimIndent()
 
         AlertDialog.Builder(this)
@@ -284,7 +422,7 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton("Anladım", null)
             .show()
     }
-    // Oyunu sıfırlama fonksiyonu (Toplam maçı sıfırlar)
+
     private fun resetGame() {
         player1SetsWon = 0
         player2SetsWon = 0
@@ -292,7 +430,6 @@ class MainActivity : AppCompatActivity() {
         resetSet()
     }
 
-    // Seti sıfırlama fonksiyonu
     private fun resetSet() {
         board = intArrayOf(4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0)
         currentPlayer = 1
@@ -302,38 +439,31 @@ class MainActivity : AppCompatActivity() {
         updateUI()
     }
 
-    // Oyuncunun hamlesini başlatan fonksiyon
     private fun playTurn(startIndex: Int) {
         if (isMoving) return
         isMoving = true
 
         val stonesInPocket = board[startIndex]
 
-        // KURAL: Cebe tek taş varsa, sadece o taşı alıp bir sonraki cebe at.
         if (stonesInPocket == 1) {
-            board[startIndex] = 0 // Başlangıç cebini boşalt
-
+            board[startIndex] = 0
             var nextIndex = (startIndex + 1) % board.size
 
-            // Rakibin haznesini atla
             if (currentPlayer == 1 && nextIndex == 13) {
                 nextIndex = (nextIndex + 1) % board.size
             } else if (currentPlayer == 2 && nextIndex == 6) {
                 nextIndex = (nextIndex + 1) % board.size
             }
 
-            board[nextIndex]++ // Bir sonraki cebe taşı koy
+            board[nextIndex]++
             soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
 
             isMoving = false
-            applyGameRules(nextIndex) // Kuralları uygula
-        }
-        // Standart kural: 1'den fazla taş varsa, bir tane bırakıp diğerlerini dağıt.
-        else {
+            applyGameRules(nextIndex)
+        } else {
             board[startIndex] = 1
             val remainingStones = stonesInPocket - 1
 
-            // Taş sayısını ekranda göster
             if (currentPlayer == 1) {
                 player1StonesCountText.text = remainingStones.toString()
                 player1StonesCountText.visibility = View.VISIBLE
@@ -345,61 +475,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             updateUI()
-
             distributeSeedsAnimated(startIndex, remainingStones)
         }
     }
 
-    // Taşları animasyonlu bir şekilde dağıtma
-    /*private fun distributeSeedsAnimated(startIndex: Int, remainingStones: Int) {
-        var currentIndex = startIndex
-        var stonesLeft = remainingStones
-        var lastIndex = -1
-
-        val runnable = object : Runnable {
-            override fun run() {
-                if (stonesLeft == 0) {
-                    isMoving = false
-                    player1StonesCountText.visibility = View.INVISIBLE
-                    player2StonesCountText.visibility = View.INVISIBLE
-                    applyGameRules(lastIndex)
-                    return
-                }
-
-                currentIndex = (currentIndex + 1) % board.size
-
-                // Rakibin haznesini atla
-                if (currentPlayer == 1 && currentIndex == 13) {
-                    currentIndex = (currentIndex + 1) % board.size
-                } else if (currentPlayer == 2 && currentIndex == 6) {
-                    currentIndex = (currentIndex + 1) % board.size
-                }
-
-                board[currentIndex]++
-                soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
-
-                lastIndex = currentIndex
-                stonesLeft--
-
-                // Kalan taş sayısını güncelle
-                if (currentPlayer == 1) {
-                    player1StonesCountText.text = stonesLeft.toString()
-                } else {
-                    player2StonesCountText.text = stonesLeft.toString()
-                }
-
-                updateUI()
-                handler.postDelayed(this, 300)
-            }
-        }
-        handler.post(runnable)
-
-
-        board[currentIndex]++
-        soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
-        pulsePocket(currentIndex)
-    }
-    */
     private fun distributeSeedsAnimated(startIndex: Int, remainingStones: Int) {
         var currentIndex = startIndex
         var stonesLeft = remainingStones
@@ -417,7 +496,6 @@ class MainActivity : AppCompatActivity() {
 
                 currentIndex = (currentIndex + 1) % board.size
 
-                // Rakibin haznesini atla
                 if (currentPlayer == 1 && currentIndex == 13) {
                     currentIndex = (currentIndex + 1) % board.size
                 } else if (currentPlayer == 2 && currentIndex == 6) {
@@ -427,7 +505,6 @@ class MainActivity : AppCompatActivity() {
                 board[currentIndex]++
                 soundPool.play(stoneSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
 
-                // ✅ Pulse burada olmalı
                 pulsePocket(currentIndex)
 
                 lastIndex = currentIndex
@@ -447,17 +524,13 @@ class MainActivity : AppCompatActivity() {
         handler.post(runnable)
     }
 
-    // Oyun kurallarını uygulayan fonksiyon
     private fun applyGameRules(lastIndex: Int) {
         var nextPlayer = if (currentPlayer == 1) 2 else 1
 
         when {
-            // KURAL 1: Son taş kendi hazinesine gelirse bir tur daha oynar.
             (currentPlayer == 1 && lastIndex == 6) || (currentPlayer == 2 && lastIndex == 13) -> {
                 nextPlayer = currentPlayer
             }
-
-            // KURAL 2: Son taş rakibin bölgesinde çift sayıda taş olan bir kuyuya düşerse, tüm taşları alır.
             (currentPlayer == 1 && lastIndex in 7..12 && board[lastIndex] % 2 == 0) -> {
                 board[6] += board[lastIndex]
                 board[lastIndex] = 0
@@ -468,8 +541,6 @@ class MainActivity : AppCompatActivity() {
                 board[lastIndex] = 0
                 nextPlayer = 1
             }
-
-            // KURAL 3: Son taş kendi bölgesindeki boş kuyuya denk gelirse ve karşısında taş varsa, hem o taşı hem de karşıdaki taşları alır.
             (currentPlayer == 1 && lastIndex in 0..5 && board[lastIndex] == 1) -> {
                 val oppositePocketIndex = 12 - lastIndex
                 if (board[oppositePocketIndex] > 0) {
@@ -494,66 +565,47 @@ class MainActivity : AppCompatActivity() {
         checkGameOver()
         updateUI()
 
-        // Tekli oyun modu aktifse, sıra bilgisayardaysa hamle yapar
         if (isSinglePlayer && currentPlayer == 2 && !isMoving) {
-            handler.postDelayed({
-                playComputerTurn()
-            }, 1500)
+            handler.postDelayed({ playComputerTurn() }, 1500)
         }
     }
 
-    // Basit Yapay Zeka (Bilgisayar) Hamlesi
     private fun playComputerTurn() {
         var bestMoveIndex = -1
 
-        // Kural 1: Kendi haznesine son taşı getiren hamleyi ara
         for (i in 7..12) {
             if (board[i] > 0) {
-                // Son taşın düşeceği kuyunun indeksi
                 val finalPocketIndex = (i + board[i] - 1) % board.size
-                if (finalPocketIndex == 13) {
-                    bestMoveIndex = i
-                    break
-                }
+                if (finalPocketIndex == 13) { bestMoveIndex = i; break }
             }
         }
 
-        // Kural 2: Rakibin taşını çalma fırsatı varsa
         if (bestMoveIndex == -1) {
             for (i in 7..12) {
                 if (board[i] > 0) {
                     val finalPocketIndex = (i + board[i] - 1) % board.size
                     if (finalPocketIndex in 0..5) {
-                        // Eğer son taş, rakibin cebindeki taşları çift yapıyorsa
-                        if ((board[finalPocketIndex] + 1) % 2 == 0) {
-                            bestMoveIndex = i
-                            break
-                        }
+                        if ((board[finalPocketIndex] + 1) % 2 == 0) { bestMoveIndex = i; break }
                     }
                 }
             }
         }
 
-        // Kural 3: Kendi boş kuyusuna son taşı getirme ve karşıdan taş çalma fırsatı varsa
         if (bestMoveIndex == -1) {
             for (i in 7..12) {
                 if (board[i] > 0) {
                     val finalPocketIndex = (i + board[i] - 1) % board.size
                     if (finalPocketIndex in 7..12 && board[finalPocketIndex] == 0) {
                         val oppositePocketIndex = 12 - finalPocketIndex
-                        if (board[oppositePocketIndex] > 0) {
-                            bestMoveIndex = i
-                            break
-                        }
+                        if (board[oppositePocketIndex] > 0) { bestMoveIndex = i; break }
                     }
                 }
             }
         }
 
-        // En çok taşa sahip cepten oyna (varsayılan)
         if (bestMoveIndex == -1) {
             var maxStones = -1
-            var possibleMoves = mutableListOf<Int>()
+            val possibleMoves = mutableListOf<Int>()
             for (i in 7..12) {
                 if (board[i] > 0) {
                     if (board[i] > maxStones) {
@@ -570,52 +622,38 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        if (bestMoveIndex != -1) {
-            playTurn(bestMoveIndex)
-        }
+        if (bestMoveIndex != -1) playTurn(bestMoveIndex)
     }
 
-    // Setin bitip bitmediğini kontrol etme
     private fun checkGameOver() {
         val player1PocketsEmpty = (0..5).all { board[it] == 0 }
         val player2PocketsEmpty = (7..12).all { board[it] == 0 }
 
         if (player1PocketsEmpty || player2PocketsEmpty) {
-            // KURAL 4: Oyunculardan herhangi birinin bölgesi boşaldığında, rakibinin bölgesindeki tüm taşları kazanır.
             if (player1PocketsEmpty) {
-                for (i in 7..12) {
-                    board[6] += board[i]
-                    board[i] = 0
-                }
+                for (i in 7..12) { board[6] += board[i]; board[i] = 0 }
             } else if (player2PocketsEmpty) {
-                for (i in 0..5) {
-                    board[13] += board[i]
-                    board[i] = 0
-                }
+                for (i in 0..5) { board[13] += board[i]; board[i] = 0 }
             }
 
-            // Set sonu
             val setWinnerMessage = when {
-                board[6] > board[13] -> {
-                    player1SetsWon++
-                    "Set Bitti! $player1Name Kazandı!"
-                }
-                board[13] > board[6] -> {
-                    player2SetsWon++
-                    "Set Bitti! $player2Name Kazandı!"
-                }
+                board[6] > board[13] -> { player1SetsWon++; "Set Bitti! $player1Name Kazandı!" }
+                board[13] > board[6] -> { player2SetsWon++; "Set Bitti! $player2Name Kazandı!" }
                 else -> "Set Berabere Bitti!"
             }
 
-            // Genel oyunun bitip bitmediğini kontrol et
             if (currentSet < 5) {
                 Toast.makeText(this, setWinnerMessage, Toast.LENGTH_SHORT).show()
+
+                // ✅ Set sonu doğal geçiş -> interstitial burada (policy uyumlu) [2](https://sgs-my.sharepoint.com/personal/ferid_cetin_sgs_com/Documents/Microsoft%20Copilot%20Chat%20Files/ic_person.xml)[3](https://sgs-my.sharepoint.com/personal/ferid_cetin_sgs_com/Documents/Microsoft%20Copilot%20Chat%20Files/pocket_background_oval_player1.xml)[4](https://deepwiki.com/googleads/googleads-mobile-android-examples/4-banner-ads)
                 handler.postDelayed({
-                    currentSet++
-                    resetSet()
+                    showInterstitialIfReady {
+                        currentSet++
+                        resetSet()
+                    }
                 }, 2000)
+
             } else {
-                // Oyunun genel kazananını belirle
                 val finalWinnerMessage = when {
                     player1SetsWon > player2SetsWon -> "Maç Bitti! $player1Name ${player1SetsWon}-${player2SetsWon} ile Kazandı!"
                     player2SetsWon > player1SetsWon -> "Maç Bitti! $player2Name ${player2SetsWon}-${player1SetsWon} ile Kazandı!"
@@ -628,13 +666,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Arayüzü güncelleme fonksiyonu
     private fun updateUI() {
         pockets.forEachIndexed { index, button ->
             val pocketIndex = if (index < 6) index else index + 1
             button.text = board[pocketIndex].toString()
 
-            // Aktif oyuncu ceplerini vurgula
             if ((currentPlayer == 1 && pocketIndex in 0..5) || (currentPlayer == 2 && pocketIndex in 7..12)) {
                 button.isEnabled = true
                 button.alpha = 1.0f
@@ -645,10 +681,10 @@ class MainActivity : AppCompatActivity() {
                 button.setTextColor(Color.WHITE)
             }
         }
+
         store1.text = board[6].toString()
         store2.text = board[13].toString()
 
-        // Sıra metnini güncelle
         if (!isMoving) {
             if (currentPlayer == 1) {
                 statusText.text = "Sıra: $player1Name"
@@ -664,7 +700,6 @@ class MainActivity : AppCompatActivity() {
     private val pocketButtonByBoardIndex: Array<Button?> = arrayOfNulls(14)
 
     private fun bindPocketMap() {
-        // board index -> button eşlemesi
         pocketButtonByBoardIndex[0] = findViewById(R.id.button_pocket0)
         pocketButtonByBoardIndex[1] = findViewById(R.id.button_pocket1)
         pocketButtonByBoardIndex[2] = findViewById(R.id.button_pocket2)
@@ -697,5 +732,4 @@ class MainActivity : AppCompatActivity() {
             }
             .start()
     }
-
 }
