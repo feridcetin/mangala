@@ -43,12 +43,14 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 // (İstersen splash'i tamamen bırak demiştin; sende hâlâ var. Kalsın istiyorsan sorun yok.)
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.gms.ads.RequestConfiguration
 
 class MainActivity : AppCompatActivity() {
 
+
     private var bannerAdView: AdView? = null
 
-    // Oyunun durumunu tutan değişkenler
+    // UI
     private lateinit var pockets: List<Button>
     private lateinit var store1: TextView
     private lateinit var store2: TextView
@@ -58,22 +60,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var player2StonesCountText: TextView
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
-
-    // Set skorları ve set bilgisi
     private lateinit var setScoreText: TextView
+
+    // Game state
     private var player1SetsWon = 0
     private var player2SetsWon = 0
     private var currentSet = 1
 
-    // Oyuncu isimleri
     private var player1Name = "Oyuncu 1"
     private var player2Name = "Oyuncu 2"
 
-    // Ses
     private lateinit var soundPool: SoundPool
     private var stoneSoundId: Int = 0
 
-    // board
     private var board = IntArray(14)
     private var currentPlayer = 1
     private var isMoving = false
@@ -82,12 +81,15 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var sharedPreferences: SharedPreferences
 
-    // Interstitial
+    // Ads
     private var interstitialAd: InterstitialAd? = null
     private var lastInterstitialShownAt = 0L
 
-    @SuppressLint("WrongConstant")
+    // Pocket pulse map
+    private val pocketButtonByBoardIndex: Array<Button?> = arrayOfNulls(14)
 
+
+    @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -107,7 +109,11 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        // UI bileşenlerini bağla
+        // UI bind
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navigationView = findViewById(R.id.nav_view)
+        menuButton = findViewById(R.id.button_open_menu)
+
         pockets = listOf(
             findViewById(R.id.button_pocket0),
             findViewById(R.id.button_pocket1),
@@ -126,20 +132,21 @@ class MainActivity : AppCompatActivity() {
         store1 = findViewById(R.id.textView_store1)
         store2 = findViewById(R.id.textView_store2)
         statusText = findViewById(R.id.textView_status)
-        menuButton = findViewById(R.id.button_open_menu)
         player1StonesCountText = findViewById(R.id.textView_sayi1)
         player2StonesCountText = findViewById(R.id.textView_sayi2)
-        drawerLayout = findViewById(R.id.drawer_layout)
-        navigationView = findViewById(R.id.nav_view)
         setScoreText = findViewById(R.id.textView_set_score)
 
-        // ✅ Ads: Banner Drawer içinde, Interstitial set sonunda
+        // ✅ 1) Families / under-age / rating ayarları (global) — initialize ve reklam yüklemeden önce
+        configureMobileAdsForFamilies()
+
+        // ✅ 2) Mobile Ads SDK init
+        MobileAds.initialize(this)
+
+        // ✅ 3) Ads yüklemeleri
         preloadInterstitial()
+        loadBanner()   // senin mevcut banner fonksiyonun
 
-        loadBanner()
-
-
-        // SoundPool
+        // Sound
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -151,14 +158,16 @@ class MainActivity : AppCompatActivity() {
             .build()
         stoneSoundId = soundPool.load(this, R.raw.stone_sound, 1)
 
-
+        // Menu open (görünmez/arkada kalma sorununa karşı güçlendirilmiş)
         menuButton.setOnClickListener {
-            //Toast.makeText(this, "Menü tıklandı", Toast.LENGTH_SHORT).show()
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
             navigationView.bringToFront()
+            navigationView.translationZ = 50f
+            navigationView.elevation = 50f
+            drawerLayout.setDrawerElevation(50f)
             drawerLayout.requestLayout()
             drawerLayout.openDrawer(navigationView, true)
         }
-
 
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -219,64 +228,31 @@ class MainActivity : AppCompatActivity() {
         bindPocketMap()
     }
 
+    /**
+     * ✅ Global ad request konfigürasyonu:
+     * - COPPA child-directed treatment
+     * - Under age of consent (EEA)
+     * - Max ad content rating: G (Families / general audience)
+     *
+     * setRequestConfiguration() globaldir ve her AdRequest için geçerlidir. [1](https://developers.google.com/admob/android/reference/com/google/android/gms/ads/MobileAds)[2](https://developers.google.com/ad-manager/mobile-ads-sdk/android/reference/com/google/android/gms/ads/RequestConfiguration)
+     */
+    private fun configureMobileAdsForFamilies() {
+        val requestConfiguration = RequestConfiguration.Builder()
+            .setTagForChildDirectedTreatment(RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE) // [2](https://developers.google.com/ad-manager/mobile-ads-sdk/android/reference/com/google/android/gms/ads/RequestConfiguration)[3](https://developers.google.com/admob/android/reference/com/google/android/gms/ads/RequestConfiguration.Builder)
+            .setTagForUnderAgeOfConsent(RequestConfiguration.TAG_FOR_UNDER_AGE_OF_CONSENT_TRUE)         // [2](https://developers.google.com/ad-manager/mobile-ads-sdk/android/reference/com/google/android/gms/ads/RequestConfiguration)[3](https://developers.google.com/admob/android/reference/com/google/android/gms/ads/RequestConfiguration.Builder)
+            .setMaxAdContentRating(RequestConfiguration.MAX_AD_CONTENT_RATING_G)                        // [2](https://developers.google.com/ad-manager/mobile-ads-sdk/android/reference/com/google/android/gms/ads/RequestConfiguration)[3](https://developers.google.com/admob/android/reference/com/google/android/gms/ads/RequestConfiguration.Builder)
+            .build()
+
+        MobileAds.setRequestConfiguration(requestConfiguration) // [1](https://developers.google.com/admob/android/reference/com/google/android/gms/ads/MobileAds)
+    }
+
 
     // ============ ADS ============
-
-    private fun loadBannerInDrawerHeader() {
-        MobileAds.initialize(this)
-
-        // Header view hazır mı? Değilse inflate eder.
-        val headerView = if (navigationView.headerCount > 0) {
-            navigationView.getHeaderView(0)
-        } else {
-            navigationView.inflateHeaderView(R.layout.nav_header_main)
-        }
-
-        val adContainer = headerView.findViewById<FrameLayout>(R.id.ad_view_container)
-
-        val adView = AdView(this)
-        adView.adUnitId = "ca-app-pub-3940256099942544/9214589741" // ✅ Test banner [1](https://developer.android.com/latest-updates/)
-        adView.setAdSize(AdSize.MEDIUM_RECTANGLE)
-
-        adContainer.removeAllViews()
-        adContainer.addView(adView)
-
-        adView.loadAd(AdRequest.Builder().build())
-        bannerAdView = adView
-    }
-
-    private fun loadBannerInDrawer() {
-        MobileAds.initialize(this)
-
-        val headerView = navigationView.getHeaderView(0)
-        val adContainer = headerView.findViewById<FrameLayout>(R.id.ad_view_container)
-
-        val adView = AdView(this)
-        adView.adUnitId = "ca-app-pub-2120666198065087/5263827432"
-
-        // Drawer içinde en düzenli: 300x250
-        adView.setAdSize(AdSize.MEDIUM_RECTANGLE)
-
-        adContainer.removeAllViews()
-        adContainer.addView(adView)
-
-        adView.loadAd(AdRequest.Builder().build())
-        bannerAdView = adView
-    }
-
-
     private fun loadBanner() {
-        // Google banner kurulumu: container içine AdView ekleme yaklaşımı doğru. [1](https://developer.android.com/latest-updates/)
-        MobileAds.initialize(this)
-
         val adContainer = findViewById<FrameLayout>(R.id.ad_view_container)
         val adView = AdView(this)
-
-        // ✅ Banner unit id (prod)
         adView.adUnitId = "ca-app-pub-2120666198065087/5263827432"
-
-        // ✅ SOL şerit için sabit boy: 300x250
-        adView.setAdSize(AdSize.MEDIUM_RECTANGLE)
+        adView.setAdSize(AdSize.BANNER)
 
         adContainer.removeAllViews()
         adContainer.addView(adView)
@@ -303,7 +279,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showInterstitialIfReady(onContinue: () -> Unit) {
-        // Play/AdMob önerisi: interstitial doğal geçişlerde + aşırı sık olmamalı. [2](https://sgs-my.sharepoint.com/personal/ferid_cetin_sgs_com/Documents/Microsoft%20Copilot%20Chat%20Files/ic_person.xml)[3](https://sgs-my.sharepoint.com/personal/ferid_cetin_sgs_com/Documents/Microsoft%20Copilot%20Chat%20Files/pocket_background_oval_player1.xml)[4](https://deepwiki.com/googleads/googleads-mobile-android-examples/4-banner-ads)
         val now = System.currentTimeMillis()
         if (now - lastInterstitialShownAt < 60_000) {
             onContinue()
@@ -323,13 +298,11 @@ class MainActivity : AppCompatActivity() {
                 preloadInterstitial()
                 onContinue()
             }
-
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 interstitialAd = null
                 preloadInterstitial()
                 onContinue()
             }
-
             override fun onAdShowedFullScreenContent() {
                 lastInterstitialShownAt = System.currentTimeMillis()
             }
@@ -696,8 +669,6 @@ class MainActivity : AppCompatActivity() {
         }
         setScoreText.text = "Set: $currentSet / 5\nSkor: $player1SetsWon - $player2SetsWon"
     }
-
-    private val pocketButtonByBoardIndex: Array<Button?> = arrayOfNulls(14)
 
     private fun bindPocketMap() {
         pocketButtonByBoardIndex[0] = findViewById(R.id.button_pocket0)

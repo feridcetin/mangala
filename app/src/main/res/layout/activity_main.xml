@@ -17,6 +17,7 @@
 
         <!-- ✅ Banner container: SOL ŞERİT -->
 
+
         <FrameLayout
             android:id="@+id/ad_view_container"
             android:layout_width="120dp"
@@ -28,6 +29,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="0.5" />
+
 
 
         <TextView
@@ -264,6 +266,7 @@
 
     <!-- Navigasyon Menüsü -->
 
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
@@ -273,10 +276,11 @@
         android:background="@drawable/nav_drawer_bg"
         android:elevation="30dp"
         android:translationZ="30dp"
-        app:menu="@menu/drawer_menu"
         app:headerLayout="@layout/nav_header_main"
         app:itemTextColor="@android:color/white"
-        app:itemIconTint="@android:color/white"/>
+        app:itemIconTint="@android:color/white"
+        app:menu="@menu/drawer_menu" />
+
 
 
 </androidx.drawerlayout.widget.DrawerLayout>
